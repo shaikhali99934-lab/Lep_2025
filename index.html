@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zero Leprosy Project 2025 - Karachi Analytical Dashboard</title>
+
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+
+  <!-- Chart.js for Analytics Visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Dashboard Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <div class="dashboard-container">
+
+    <!-- 1. Top Header Banner -->
+    <header class="header-banner">
+      <div class="header-left-wrap">
+        <div class="logo-box">
+          <img src="malc logo.png" alt="Marie Adelaide Leprosy Centre Logo" class="malc-logo-img">
+        </div>
+        <div>
+          <div class="org-tagline">
+            <span>🏥</span> Marie Adelaide Leprosy Centre, Karachi
+          </div>
+          <h1 class="banner-title">
+            ZERO Leprosy Project 2025
+            <span class="region-badge">Karachi Sheet</span>
+          </h1>
+          <p class="banner-subtitle" id="banner-subtitle">
+            Analytical Target vs. Achievement Performance Dashboard • 87 Activities
+          </p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button id="theme-toggle-btn" class="btn" title="Toggle Dark/Light Mode">
+          🌙 Theme
+        </button>
+        <button id="btn-export-csv" class="btn btn-primary" title="Export Current Filtered Data to CSV">
+          <span>📥</span> Export CSV
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. Outcomes 1 to 5 Cards - Placed on Top -->
+    <section class="tier-section" style="margin-bottom: 1.5rem;">
+      <div class="outcomes-kpi-grid" id="outcomes-kpi-grid">
+        <!-- Populated via JS -->
+      </div>
+    </section>
+
+    <!-- 3. Filter Area & Controls Toolbar -->
+    <section class="toolbar-wrap" style="margin-bottom: 1.25rem;">
+      <div class="filters-group">
+        <!-- Target Achievement Dropdown Filter -->
+        <div class="filter-item-wrap">
+          <label for="filter-status" class="filter-label">🎯 Achievement Status:</label>
+          <select id="filter-status" class="filter-select highlight-filter"
+            title="Filter activities by target achievement status">
+            <option value="all">🚦 All Statuses (87)</option>
+            <option value="fully_achieved">✓ Target Achieved (≥70%)</option>
+            <option value="partially_achieved">▲ Partially Achieved (50% – 69%)</option>
+            <option value="not_achieved">✕ Not Achieved (&lt;50%)</option>
+          </select>
+        </div>
+
+        <!-- Quarter Period Filter -->
+        <div class="filter-item-wrap">
+          <label for="filter-quarter" class="filter-label">📅 Period:</label>
+          <select id="filter-quarter" class="filter-select" title="Select Reporting Quarter">
+            <option value="all">Full Year 2025</option>
+            <option value="Q1">Quarter 1 (Jan - Mar)</option>
+            <option value="Q2">Quarter 2 (Apr - Jun)</option>
+            <option value="Q3">Quarter 3 (Jul - Sep)</option>
+            <option value="Q4">Quarter 4 (Oct - Dec)</option>
+          </select>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" class="search-input" placeholder="Search activities..."
+            title="Type to search by code or title">
+        </div>
+
+        <!-- Reset Button -->
+        <button id="btn-reset-filters" class="btn" title="Reset all filters to default">
+          🔄 Reset
+        </button>
+      </div>
+
+      <!-- View Switcher -->
+      <div class="view-switcher-group">
+        <button class="view-btn active" data-view="cards" title="Activity KPI Cards View">
+          <span>🗂️</span> Cards
+        </button>
+        <button class="view-btn" data-view="matrix" title="Excel Matrix Table View">
+          <span>📊</span> Matrix Table
+        </button>
+        <button class="view-btn" data-view="charts" title="Visual Analytics Charts">
+          <span>📈</span> Analytics
+        </button>
+      </div>
+    </section>
+
+    <!-- 5. Active Result Count Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+      <div id="filtered-count-badge" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">
+        Showing 87 of 87 activities
+      </div>
+    </div>
+
+    <!-- 6. View Container 1: Activity KPI Cards View -->
+    <main id="section-cards-view">
+      <div class="activities-grid" id="activities-cards-grid">
+        <!-- Dynamically rendered via app.js -->
+      </div>
+    </main>
+
+    <!-- 7. View Container 2: Excel Matrix Table View -->
+    <main id="section-matrix-view" style="display: none;">
+      <div class="table-container" id="table-matrix-container">
+        <!-- Dynamically rendered via app.js -->
+      </div>
+    </main>
+
+    <!-- 8. View Container 3: Visual Analytics Charts View -->
+    <main id="section-charts-view" style="display: none;">
+      <div class="charts-grid">
+        <!-- Chart 1: Outcome Targets vs Achievements -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Target vs. Achieved by Strategic Outcome</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-outcomes"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Activity Health Status Distribution -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Activity Delivery Health Distribution</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-health"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: Quarterly Output Momentum -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Quarterly Performance Momentum (Q1 – Q4)</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-quarterly"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 4: Top Impact Activities by Volume -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Top High-Impact Activities by Target Volume</h3>
+          </div>
+          <div class="chart-canvas-wrap">
+            <canvas id="chart-top-activities"></canvas>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer
+      style="margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <strong>Marie Adelaide Leprosy Centre (MALC)</strong> • ZERO Leprosy Project 2025
+      </div>
+      <div>
+        Data Source: <code>Zero Leprosy Project 2025 (Karachi).xlsx</code>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Load Data & Application Script -->
+  <script src="data_karachi.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
