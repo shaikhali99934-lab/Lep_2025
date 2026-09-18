@@ -1,14 +1,15 @@
-// Zero Leprosy Project 2025 - Karachi Analytical Dashboard Engine
+// Zero Leprosy Project 2025 - Multi-Region & Consolidated Dashboard Engine
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Check if data is loaded
-  if (typeof KARACHI_DATA === 'undefined') {
-    console.error('KARACHI_DATA not found. Please ensure data_karachi.js is loaded.');
+  // Check if multi-region data is loaded
+  if (typeof REGIONS_DATA === 'undefined' && typeof KARACHI_DATA === 'undefined') {
+    console.error('REGIONS_DATA not found. Please ensure data_regions.js is loaded.');
     return;
   }
 
   // Application State
   const state = {
+    selectedRegion: 'consolidated', // 'consolidated', 'karachi', 'interior_sindh', 'balochistan', 'kpk', 'azad_kashmir', 'gilgit_baltistan', 'hq_training'
     selectedOutcome: 'all',
     selectedStatus: 'all',
     selectedQuarter: 'all', // 'all', 'Q1', 'Q2', 'Q3', 'Q4'
@@ -18,27 +19,60 @@ document.addEventListener('DOMContentLoaded', () => {
     theme: localStorage.getItem('zlp_theme') || 'dark'
   };
 
+  // Helper to retrieve the active region or consolidated dataset
+  function getCurrentDataset() {
+    if (typeof REGIONS_DATA !== 'undefined' && REGIONS_DATA[state.selectedRegion]) {
+      return REGIONS_DATA[state.selectedRegion];
+    }
+    if (typeof KARACHI_DATA !== 'undefined') {
+      return KARACHI_DATA;
+    }
+    return {
+      key: 'unknown',
+      region: 'Unknown',
+      summary: { outcomes: {}, statusCounts: {}, quarters: {}, totalPlanned: 0, totalAchieved: 0, overallPct: 0 },
+      activities: []
+    };
+  }
+
   // Set Theme
   document.documentElement.setAttribute('data-theme', state.theme);
 
   // Initialize Elements
-  initHeader();
+  updateHeaderInfo();
   renderExecutiveKPIs();
   renderOutcomeKPIs();
   setupEventListeners();
   renderCurrentView();
 
-  // 1. Initialize Header
-  function initHeader() {
+  // 1. Initialize & Update Header Info
+  function updateHeaderInfo() {
+    const curData = getCurrentDataset();
     const bannerSubtitle = document.getElementById('banner-subtitle');
+    const regionBadge = document.getElementById('banner-region-badge');
+    const footerSource = document.getElementById('footer-data-source');
+
+    if (regionBadge) {
+      regionBadge.textContent = `${curData.icon || '📍'} ${curData.region}`;
+    }
+
     if (bannerSubtitle) {
-      bannerSubtitle.textContent = `Marie Adelaide Leprosy Centre • 2025 Target vs. Achievement Analysis • 87 Program Activities`;
+      if (curData.key === 'consolidated') {
+        bannerSubtitle.textContent = `Marie Adelaide Leprosy Centre • 2025 Target vs. Achievement Analysis • National Consolidated (${curData.activities.length} Activities across 7 Regional Sheets)`;
+      } else {
+        bannerSubtitle.textContent = `Marie Adelaide Leprosy Centre • 2025 Target vs. Achievement Analysis • ${curData.region} (${curData.activities.length} Activities)`;
+      }
+    }
+
+    if (footerSource) {
+      footerSource.textContent = curData.sourceFile || curData.sheet || 'Excel Data';
     }
   }
 
   // 2. Render Executive Tier 1 KPIs
   function renderExecutiveKPIs() {
-    const s = KARACHI_DATA.summary;
+    const curData = getCurrentDataset();
+    const s = curData.summary;
     const formatNum = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 1 });
 
     // Planned
@@ -63,42 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
       elProgressBar.style.width = `${Math.min(s.overallPct, 100)}%`;
       elProgressBar.style.backgroundColor = s.overallPct >= 100 ? '#10b981' : s.overallPct >= 70 ? '#3b82f6' : '#f59e0b';
     }
-
-    // Health Status Breakdown
-    const elStatusWrap = document.getElementById('kpi-status-breakdown');
-    if (elStatusWrap) {
-      elStatusWrap.innerHTML = `
-        <span class="health-pill pill-emerald" title="Activities meeting or exceeding 100% target">
-          <strong>${s.statusCounts.exceeded}</strong> Target Met (≥100%)
-        </span>
-        <span class="health-pill pill-blue" title="Activities on track between 70% and 99.9%">
-          <strong>${s.statusCounts.ontrack}</strong> On Track (70-99%)
-        </span>
-        <span class="health-pill pill-amber" title="Activities with 1% to 69.9% progress">
-          <strong>${s.statusCounts.inprogress}</strong> In Progress (1-69%)
-        </span>
-        <span class="health-pill pill-slate" title="Activities scheduled or not started">
-          <strong>${s.statusCounts.notstarted}</strong> Not Started (0%)
-        </span>
-      `;
-    }
-
-    // Quarterly Mini Progress
-    const elQProgress = document.getElementById('kpi-quarterly-progress');
-    if (elQProgress) {
-      const q3 = s.quarters.Q3;
-      const q4 = s.quarters.Q4;
-      elQProgress.innerHTML = `
-        <div style="display: flex; justify-content: space-between; font-size: 0.82rem; margin-bottom: 0.25rem;">
-          <span>Q3: <strong>${formatNum(q3.achieved)}</strong> / ${formatNum(q3.planned)}</span>
-          <span style="color: #10b981; font-weight: 700;">${q3.pct}%</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 0.82rem;">
-          <span>Q4: <strong>${formatNum(q4.achieved)}</strong> / ${formatNum(q4.planned)}</span>
-          <span style="color: #10b981; font-weight: 700;">${q4.pct}%</span>
-        </div>
-      `;
-    }
   }
 
   // 3. Render Outcome / Pillar KPI Cards (Tier 2)
@@ -106,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const grid = document.getElementById('outcomes-kpi-grid');
     if (!grid) return;
 
-    const outcomes = KARACHI_DATA.summary.outcomes;
+    const curData = getCurrentDataset();
+    const outcomes = curData.summary.outcomes;
     const formatNum = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 0 });
 
     grid.innerHTML = Object.keys(outcomes).map(k => {
@@ -164,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Sync outcome dropdown
         const select = document.getElementById('filter-outcome');
         if (select) select.value = state.selectedOutcome;
-        
+
         renderOutcomeKPIs();
         renderCurrentView();
       });
@@ -173,6 +172,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 4. Setup Event Listeners
   function setupEventListeners() {
+    // Region / Province Dropdown Selector
+    const regionSelect = document.getElementById('select-region');
+    if (regionSelect) {
+      regionSelect.value = state.selectedRegion;
+      regionSelect.addEventListener('change', e => {
+        state.selectedRegion = e.target.value;
+        updateHeaderInfo();
+        renderExecutiveKPIs();
+        renderOutcomeKPIs();
+        renderCurrentView();
+      });
+    }
+
     // View Switcher
     document.querySelectorAll('.view-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -256,11 +268,29 @@ document.addEventListener('DOMContentLoaded', () => {
     if (exportBtn) {
       exportBtn.addEventListener('click', exportToCSV);
     }
+
+    // Matrix Table Horizontal Scroll Controls
+    const btnScrollLeft = document.getElementById('btn-scroll-left');
+    const btnScrollRight = document.getElementById('btn-scroll-right');
+    const matrixContainer = document.getElementById('table-matrix-container');
+
+    if (btnScrollLeft && matrixContainer) {
+      btnScrollLeft.addEventListener('click', () => {
+        matrixContainer.scrollBy({ left: -420, behavior: 'smooth' });
+      });
+    }
+
+    if (btnScrollRight && matrixContainer) {
+      btnScrollRight.addEventListener('click', () => {
+        matrixContainer.scrollBy({ left: 420, behavior: 'smooth' });
+      });
+    }
   }
 
   // 5. Filter Activities based on State
   function getFilteredActivities() {
-    return KARACHI_DATA.activities.filter(a => {
+    const curData = getCurrentDataset();
+    return curData.activities.filter(a => {
       // Outcome filter
       if (state.selectedOutcome !== 'all' && a.outcome !== state.selectedOutcome) {
         return false;
@@ -268,10 +298,13 @@ document.addEventListener('DOMContentLoaded', () => {
       // Status filter
       if (state.selectedStatus !== 'all') {
         const isQuarter = state.selectedQuarter !== 'all';
+        const pVal = isQuarter ? (a.quarters[state.selectedQuarter] ? a.quarters[state.selectedQuarter].planned : 0) : a.planned_total;
         const pctVal = isQuarter ? (a.quarters[state.selectedQuarter] ? a.quarters[state.selectedQuarter].pct : 0) : a.pct_total;
-        
+
         let code = 'not_achieved';
-        if (pctVal >= 70.0) {
+        if (pVal === 0) {
+          code = 'no_target';
+        } else if (pctVal >= 70.0) {
           code = 'fully_achieved';
         } else if (pctVal >= 50.0) {
           code = 'partially_achieved';
@@ -286,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const query = state.searchQuery;
         const matchCode = a.code.toLowerCase().includes(query);
         const matchTitle = a.title.toLowerCase().includes(query);
-        const matchSub = a.subTitle.toLowerCase().includes(query);
+        const matchSub = (a.subTitle || '').toLowerCase().includes(query);
         if (!matchCode && !matchTitle && !matchSub) return false;
       }
       return true;
@@ -300,9 +333,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartsSection = document.getElementById('section-charts-view');
     const filteredCountBadge = document.getElementById('filtered-count-badge');
 
+    const curData = getCurrentDataset();
     const filtered = getFilteredActivities();
     if (filteredCountBadge) {
-      filteredCountBadge.textContent = `Showing ${filtered.length} of ${KARACHI_DATA.activities.length} activities`;
+      filteredCountBadge.textContent = `Showing ${filtered.length} of ${curData.activities.length} activities (${curData.region})`;
     }
 
     // Toggle container visibilities
@@ -353,6 +387,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       // Activity thresholds per user criteria:
+      // Zero Target: No Target Assigned (slate)
       // >= 70%: Target Achieved (emerald/green)
       // 50% - 69.9%: Partially Achieved (amber/yellow)
       // < 50%: Not Achieved (rose/red)
@@ -360,7 +395,11 @@ document.addEventListener('DOMContentLoaded', () => {
       let statusBadge = '✕ Not Achieved';
       let progressColor = '#f43f5e';
 
-      if (pctVal >= 70.0) {
+      if (plannedVal === 0) {
+        pillClass = 'pill-slate';
+        statusBadge = '⚪ No Target Assigned';
+        progressColor = '#94a3b8';
+      } else if (pctVal >= 70.0) {
         pillClass = 'pill-emerald';
         statusBadge = '✓ Target Achieved';
         progressColor = '#10b981';
@@ -410,16 +449,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
               <div class="quarters-chip-grid">
                 ${['Q1', 'Q2', 'Q3', 'Q4'].map(q => {
-                  const qInfo = a.quarters[q];
-                  const qClass = qInfo.pct >= 70.0 ? 'pill-emerald' : (qInfo.pct >= 50.0 ? 'pill-amber' : 'pill-rose');
-                  return `
+        const qInfo = a.quarters[q];
+        const qClass = qInfo.planned === 0 ? 'pill-slate' : (qInfo.pct >= 70.0 ? 'pill-emerald' : (qInfo.pct >= 50.0 ? 'pill-amber' : 'pill-rose'));
+        return `
                     <div class="quarter-chip ${state.selectedQuarter === q ? 'pill-cyan' : ''}">
                       <div class="quarter-chip-title">${q}</div>
                       <div class="quarter-chip-val ${qClass}" style="border-radius: 4px; padding: 0.1rem 0;">${qInfo.pct}%</div>
                       <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 0.15rem;">${formatNum(qInfo.achieved)}</div>
                     </div>
                   `;
-                }).join('')}
+      }).join('')}
               </div>
             </div>
           </div>
@@ -450,10 +489,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr style="font-weight: 600;">
                       <td style="text-align: left; color: #10b981; position: sticky; left: 0; z-index: 1; background: var(--bg-elevated);">%</td>
                       ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(m => {
-                        const mpct = a.months[m].pct;
-                        const col = mpct >= 70.0 ? '#10b981' : (mpct >= 50.0 ? '#f59e0b' : (mpct > 0 ? '#f43f5e' : 'inherit'));
-                        return `<td style="color: ${col};">${mpct}%</td>`;
-                      }).join('')}
+        const mpct = a.months[m].pct;
+        const col = mpct >= 70.0 ? '#10b981' : (mpct >= 50.0 ? '#f59e0b' : (mpct > 0 ? '#f43f5e' : 'inherit'));
+        return `<td style="color: ${col};">${mpct}%</td>`;
+      }).join('')}
                     </tr>
                   </tbody>
                 </table>
@@ -495,9 +534,9 @@ document.addEventListener('DOMContentLoaded', () => {
       <table class="matrix-table">
         <thead>
           <tr>
-            <th style="min-width: 70px;">Code</th>
-            <th style="min-width: 320px;">Activity Description</th>
-            <th style="min-width: 80px;">Type</th>
+            <th class="matrix-col-code">Code</th>
+            <th class="matrix-col-desc">Activity Description</th>
+            <th class="matrix-col-type">Type</th>
             <th>Jan</th>
             <th>Feb</th>
             <th>Mar</th>
@@ -524,12 +563,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Planned Row
       html += `
         <tr class="planned-row">
-          <td rowspan="3" style="font-family: monospace; font-weight: 700; color: var(--text-accent); text-align: left; vertical-align: top;">${a.code}</td>
-          <td rowspan="3" style="text-align: left; vertical-align: top; max-width: 380px; white-space: normal; line-height: 1.35;">
-            <div style="font-weight: 600;">${a.title}</div>
-            <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem;">${a.subTitle}</div>
+          <td rowspan="3" class="matrix-cell-code">${a.code}</td>
+          <td rowspan="3" class="matrix-cell-desc">
+            <div class="matrix-activity-title">${a.title}</div>
           </td>
-          <td style="font-weight: 600; color: var(--text-muted); text-align: left;">Planned</td>
+          <td class="matrix-cell-type" style="font-weight: 600; color: var(--text-muted);">Planned</td>
           <td>${formatNum(a.months.Jan.planned)}</td>
           <td>${formatNum(a.months.Feb.planned)}</td>
           <td>${formatNum(a.months.Mar.planned)}</td>
@@ -553,7 +591,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Achieved Row
       html += `
         <tr class="achieved-row">
-          <td style="font-weight: 700; color: var(--text-accent); text-align: left;">Achieved</td>
+          <td class="matrix-cell-type" style="font-weight: 700; color: var(--text-accent);">Achieved</td>
           <td>${formatNum(a.months.Jan.achieved)}</td>
           <td>${formatNum(a.months.Feb.achieved)}</td>
           <td>${formatNum(a.months.Mar.achieved)}</td>
@@ -582,7 +620,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       html += `
         <tr class="pct-row">
-          <td style="font-weight: 700; color: #10b981; text-align: left;">%</td>
+          <td class="matrix-cell-type" style="font-weight: 700; color: #10b981;">%</td>
           <td>${pctCell(a.months.Jan.pct)}</td>
           <td>${pctCell(a.months.Feb.pct)}</td>
           <td>${pctCell(a.months.Mar.pct)}</td>
@@ -621,6 +659,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (charts[key]) charts[key].destroy();
     });
 
+    const curData = getCurrentDataset();
     const isDark = state.theme === 'dark';
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.07)' : 'rgba(0, 0, 0, 0.07)';
     const textColor = isDark ? '#9ca3af' : '#475569';
@@ -628,7 +667,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chart 1: Target vs Achieved by Outcome
     const ctxOutcomes = document.getElementById('chart-outcomes');
     if (ctxOutcomes) {
-      const outcomes = KARACHI_DATA.summary.outcomes;
+      const outcomes = curData.summary.outcomes;
       const shortLabels = {
         '1': 'Outcome 1: Case Detection & SDR-PEP',
         '2': 'Outcome 2: Comprehensive Care Services',
@@ -680,14 +719,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chart 2: Health Status Distribution (Doughnut)
     const ctxHealth = document.getElementById('chart-health');
     if (ctxHealth) {
-      const counts = KARACHI_DATA.summary.statusCounts;
+      const counts = curData.summary.statusCounts;
+      const noTargetCount = counts.no_target || 0;
       charts.health = new Chart(ctxHealth, {
         type: 'doughnut',
         data: {
-          labels: ['Fully Achieved (≥70%)', 'Partially Achieved (50-69%)', 'Target Not Achieved (<50%)'],
+          labels: ['Fully Achieved (≥70%)', 'Partially Achieved (50-69%)', 'Target Not Achieved (<50%)', 'No Target Assigned'],
           datasets: [{
-            data: [counts.fully_achieved, counts.partially_achieved, counts.not_achieved],
-            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e'],
+            data: [counts.fully_achieved, counts.partially_achieved, counts.not_achieved, noTargetCount],
+            backgroundColor: ['#10b981', '#f59e0b', '#f43f5e', '#64748b'],
             borderWidth: 2,
             borderColor: isDark ? '#111827' : '#ffffff'
           }]
@@ -706,7 +746,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chart 3: Quarterly Output Momentum
     const ctxQuarterly = document.getElementById('chart-quarterly');
     if (ctxQuarterly) {
-      const q = KARACHI_DATA.summary.quarters;
+      const q = curData.summary.quarters;
       charts.quarterly = new Chart(ctxQuarterly, {
         type: 'bar',
         data: {
@@ -743,7 +783,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Chart 4: Top 8 Activities by Target Volume
     const ctxTop = document.getElementById('chart-top-activities');
     if (ctxTop) {
-      const topActs = [...KARACHI_DATA.activities]
+      const topActs = [...curData.activities]
         .sort((a, b) => b.planned_total - a.planned_total)
         .slice(0, 8);
 
@@ -782,20 +822,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 10. Export to CSV
   function exportToCSV() {
+    const curData = getCurrentDataset();
     const acts = getFilteredActivities();
-    let csv = "Code,Activity Description,Outcome,Sub Category,Annual Planned,Annual Achieved,Achievement %,Q1 Planned,Q1 Achieved,Q2 Planned,Q2 Achieved,Q3 Planned,Q3 Achieved,Q4 Planned,Q4 Achieved\n";
-    
+    let csv = "Region,Code,Activity Description,Outcome,Sub Category,Annual Planned,Annual Achieved,Achievement %,Q1 Planned,Q1 Achieved,Q2 Planned,Q2 Achieved,Q3 Planned,Q3 Achieved,Q4 Planned,Q4 Achieved\n";
+
     acts.forEach(a => {
       const cleanTitle = `"${a.title.replace(/"/g, '""')}"`;
-      const cleanSub = `"${a.subTitle.replace(/"/g, '""')}"`;
-      csv += `${a.code},${cleanTitle},Outcome ${a.outcome},${cleanSub},${a.planned_total},${a.achieved_total},${a.pct_total}%,${a.quarters.Q1.planned},${a.quarters.Q1.achieved},${a.quarters.Q2.planned},${a.quarters.Q2.achieved},${a.quarters.Q3.planned},${a.quarters.Q3.achieved},${a.quarters.Q4.planned},${a.quarters.Q4.achieved}\n`;
+      const cleanSub = `"${(a.subTitle || '').replace(/"/g, '""')}"`;
+      csv += `"${curData.region}",${a.code},${cleanTitle},Outcome ${a.outcome},${cleanSub},${a.planned_total},${a.achieved_total},${a.pct_total}%,${a.quarters.Q1.planned},${a.quarters.Q1.achieved},${a.quarters.Q2.planned},${a.quarters.Q2.achieved},${a.quarters.Q3.planned},${a.quarters.Q3.achieved},${a.quarters.Q4.planned},${a.quarters.Q4.achieved}\n`;
     });
 
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `Zero_Leprosy_Karachi_KPI_Export_${new Date().toISOString().slice(0, 10)}.csv`);
+    link.setAttribute('download', `Zero_Leprosy_${curData.key}_KPI_Export_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

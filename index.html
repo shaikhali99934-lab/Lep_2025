@@ -35,7 +35,7 @@
           </div>
           <h1 class="banner-title">
             ZERO Leprosy Project 2025
-            <span class="region-badge">Karachi Sheet</span>
+            <span class="region-badge" id="banner-region-badge">🇵🇰 All Consolidated Provinces</span>
           </h1>
           <p class="banner-subtitle" id="banner-subtitle">
             Analytical Target vs. Achievement Performance Dashboard • 87 Activities
@@ -43,7 +43,32 @@
         </div>
       </div>
 
+      <!-- Top Right Corner Heading -->
+      <div class="header-corner-heading" id="header-corner-heading" data-title="Analystical Dashboard"
+        title="Analytical Dashboard">
+        <h2 class="corner-heading-tag">
+          <span class="corner-heading-icon">📊</span>
+          <span class="corner-heading-text">Analytical Dashboard</span>
+        </h2>
+      </div>
+
       <div class="header-actions">
+        <!-- Region / Province Dropdown Selector -->
+        <div class="region-selector-box">
+          <label for="select-region" class="region-selector-label">📍 Region / Province:</label>
+          <select id="select-region" class="region-selector-dropdown"
+            title="Select Province or National Consolidated Dashboard">
+            <option value="consolidated" selected>🇵🇰 All Consolidated Provinces</option>
+            <option value="karachi">🏙️ Karachi</option>
+            <option value="interior_sindh">🌾 Interior Sindh</option>
+            <option value="balochistan">⛰️ Balochistan</option>
+            <option value="kpk">🏔️ Khyber Pakhtunkhwa</option>
+            <option value="azad_kashmir">🌲 Azad Kashmir</option>
+            <option value="gilgit_baltistan">❄️ Gilgit Baltistan</option>
+            <option value="hq_training">🎓 HQ-Training</option>
+          </select>
+        </div>
+
         <button id="theme-toggle-btn" class="btn" title="Toggle Dark/Light Mode">
           🌙 Theme
         </button>
@@ -72,6 +97,7 @@
             <option value="fully_achieved">✓ Target Achieved (≥70%)</option>
             <option value="partially_achieved">▲ Partially Achieved (50% – 69%)</option>
             <option value="not_achieved">✕ Not Achieved (&lt;50%)</option>
+            <option value="no_target">⚪ No Target Assigned</option>
           </select>
         </div>
 
@@ -130,6 +156,16 @@
 
     <!-- 7. View Container 2: Excel Matrix Table View -->
     <main id="section-matrix-view" style="display: none;">
+      <div class="matrix-view-header">
+        <div class="matrix-hint-pill">
+          <span>↔</span> Scroll right to view Q1–Q4 Quarters &amp; Grand Total
+        </div>
+        <div class="matrix-scroll-actions">
+          <button id="btn-scroll-left" class="btn btn-sm" title="Scroll Table Left">◀ Scroll Left</button>
+          <button id="btn-scroll-right" class="btn btn-sm btn-primary" title="Scroll Table Right">Scroll Right
+            ▶</button>
+        </div>
+      </div>
       <div class="table-container" id="table-matrix-container">
         <!-- Dynamically rendered via app.js -->
       </div>
@@ -187,14 +223,14 @@
         <strong>Marie Adelaide Leprosy Centre (MALC)</strong> • ZERO Leprosy Project 2025
       </div>
       <div>
-        Data Source: <code>Zero Leprosy Project 2025 (Karachi).xlsx</code>
+        Data Source: <code id="footer-data-source">All 7 Regional Workbooks (National Consolidated)</code>
       </div>
     </footer>
 
   </div>
 
   <!-- Load Data & Application Script -->
-  <script src="data_karachi.js"></script>
+  <script src="data_regions.js"></script>
   <script src="app.js"></script>
 </body>
 

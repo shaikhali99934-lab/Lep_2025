@@ -10,9 +10,10 @@ const KARACHI_DATA = {
     "totalAchieved": 122232.66666666667,
     "overallPct": 113.1,
     "statusCounts": {
-      "fully_achieved": 46,
+      "fully_achieved": 45,
       "partially_achieved": 3,
-      "not_achieved": 38
+      "not_achieved": 12,
+      "no_target": 27
     },
     "quarters": {
       "Q1": {
@@ -53,7 +54,8 @@ const KARACHI_DATA = {
         "status_counts": {
           "fully_achieved": 13,
           "partially_achieved": 1,
-          "not_achieved": 8
+          "not_achieved": 4,
+          "no_target": 4
         }
       },
       "2": {
@@ -70,9 +72,10 @@ const KARACHI_DATA = {
         "achieved": 57821.0,
         "pct": 206.6,
         "status_counts": {
-          "fully_achieved": 17,
+          "fully_achieved": 16,
           "partially_achieved": 2,
-          "not_achieved": 8
+          "not_achieved": 3,
+          "no_target": 6
         }
       },
       "3": {
@@ -91,7 +94,8 @@ const KARACHI_DATA = {
         "status_counts": {
           "fully_achieved": 4,
           "partially_achieved": 0,
-          "not_achieved": 11
+          "not_achieved": 3,
+          "no_target": 8
         }
       },
       "4": {
@@ -110,7 +114,8 @@ const KARACHI_DATA = {
         "status_counts": {
           "fully_achieved": 6,
           "partially_achieved": 0,
-          "not_achieved": 2
+          "not_achieved": 2,
+          "no_target": 0
         }
       },
       "5": {
@@ -129,7 +134,8 @@ const KARACHI_DATA = {
         "status_counts": {
           "fully_achieved": 6,
           "partially_achieved": 0,
-          "not_achieved": 9
+          "not_achieved": 0,
+          "no_target": 9
         }
       }
     },
@@ -1573,9 +1579,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -2185,9 +2191,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -2287,9 +2293,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -2389,9 +2395,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -3103,9 +3109,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -3511,9 +3517,9 @@ const KARACHI_DATA = {
       "achieved_total": 68.0,
       "pct_total": 100.0,
       "gap": -68.0,
-      "status_code": "fully_achieved",
-      "status_label": "Fully Achieved",
-      "status_color": "emerald",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -4531,9 +4537,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -4837,9 +4843,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -4939,9 +4945,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -5143,9 +5149,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -5245,9 +5251,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -5653,9 +5659,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -5857,9 +5863,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -5959,9 +5965,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -6061,9 +6067,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -6163,9 +6169,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -6265,9 +6271,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -6367,9 +6373,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8101,9 +8107,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8305,9 +8311,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8407,9 +8413,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8509,9 +8515,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8611,9 +8617,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8713,9 +8719,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8815,9 +8821,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -8917,9 +8923,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
@@ -9019,9 +9025,9 @@ const KARACHI_DATA = {
       "achieved_total": 0.0,
       "pct_total": 0.0,
       "gap": 0.0,
-      "status_code": "not_achieved",
-      "status_label": "Target Not Achieved",
-      "status_color": "rose",
+      "status_code": "no_target",
+      "status_label": "No Target Assigned",
+      "status_color": "slate",
       "quarters": {
         "Q1": {
           "planned": 0.0,
