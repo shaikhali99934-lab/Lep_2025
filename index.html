@@ -83,7 +83,7 @@
             border-radius: 10px;
         }
 
-        /* ===== LOGIN OVERLAY ===== */
+        /* ===== LOGIN OVERLAY & POPUP MODAL ===== */
         .login-overlay {
             position: fixed;
             inset: 0;
@@ -91,8 +91,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            background: var(--bg-primary);
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            background: rgba(10, 14, 23, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.4s ease, visibility 0.4s ease;
+            padding: 16px;
         }
 
         .login-overlay.hidden {
@@ -103,90 +108,232 @@
 
         .login-box {
             background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: var(--space-xl) var(--space-lg);
-            max-width: 400px;
-            width: 90%;
+            border: 1px solid rgba(6, 182, 212, 0.35);
+            border-radius: 20px;
+            padding: 32px 28px;
+            max-width: 410px;
+            width: 100%;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.45), 0 0 40px rgba(6, 182, 212, 0.15);
+            position: relative;
+            transform: translateY(0);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+            animation: loginModalPop 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .login-box .lock-icon {
-            font-size: 3rem;
-            margin-bottom: var(--space-md);
+        @keyframes loginModalPop {
+            0% {
+                transform: scale(0.92) translateY(16px);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
         }
 
-        .login-box h2 {
-            font-size: 1.3rem;
+        @keyframes shakeError {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-8px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(8px);
+            }
+        }
+
+        .login-box.shake {
+            animation: shakeError 0.4s ease-in-out;
+        }
+
+        .login-logo {
+            height: 48px;
+            max-width: 190px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.1));
+        }
+
+        .login-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.68rem;
             font-weight: 700;
-            margin-bottom: var(--space-xs);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(6, 182, 212, 0.12);
+            color: var(--accent-1);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            margin-bottom: 12px;
         }
 
-        .login-box p {
+        .login-badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #06b6d4;
+            box-shadow: 0 0 8px #06b6d4;
+        }
+
+        .login-header h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+            line-height: 1.25;
+        }
+
+        .login-header p {
             color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: var(--space-lg);
+            font-size: 0.82rem;
+            line-height: 1.45;
+            margin-bottom: 20px;
         }
 
-        .login-box .input-group {
+        .login-input-wrap {
+            position: relative;
             display: flex;
-            flex-direction: column;
-            gap: var(--space-sm);
-            margin-bottom: var(--space-md);
+            align-items: center;
+            margin-bottom: 10px;
         }
 
-        .login-box input[type="password"] {
-            padding: var(--space-sm) var(--space-md);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-sm);
+        .login-input-icon {
+            position: absolute;
+            left: 14px;
+            font-size: 1.05rem;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .login-box input[type="password"],
+        .login-box input[type="text"] {
+            width: 100%;
+            padding: 12px 42px 12px 42px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
             background: var(--bg-primary);
             color: var(--text-primary);
             font-size: 0.95rem;
             font-family: inherit;
             outline: none;
-            transition: border-color 0.2s;
+            transition: all 0.2s ease;
         }
 
-        .login-box input[type="password"]:focus {
+        .login-box input[type="password"]:focus,
+        .login-box input[type="text"]:focus {
             border-color: var(--accent-1);
-            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+            box-shadow: 0 0 0 3.5px rgba(6, 182, 212, 0.2);
+        }
+
+        .login-box input.error {
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.2) !important;
+        }
+
+        .login-pwd-toggle {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1.05rem;
+            opacity: 0.65;
+            transition: opacity 0.2s;
+            user-select: none;
+        }
+
+        .login-pwd-toggle:hover {
+            opacity: 1;
+        }
+
+        .login-error-msg {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.78rem;
+            font-weight: 500;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .login-options {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 18px;
+            padding: 0 4px;
+        }
+
+        .remember-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.76rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .remember-label input[type="checkbox"] {
+            accent-color: var(--accent-1);
+            cursor: pointer;
+            width: 15px;
+            height: 15px;
         }
 
         .login-box .btn-login {
             width: 100%;
-            padding: var(--space-sm) var(--space-lg);
+            padding: 12px 18px;
             border: none;
-            border-radius: var(--radius-sm);
+            border-radius: 12px;
             background: var(--gradient-primary);
             color: #fff;
             font-size: 0.95rem;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: 0.02em;
             font-family: inherit;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 16px rgba(6, 182, 212, 0.3);
         }
 
         .login-box .btn-login:hover {
-            box-shadow: var(--shadow-sm);
-            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(6, 182, 212, 0.45);
+            transform: translateY(-2px);
         }
 
-        .login-box .error-msg {
-            color: #ef4444;
-            font-size: 0.8rem;
-            margin-top: var(--space-sm);
-            min-height: 1.5em;
-        }
-
-        .login-box .brand-sub {
+        .login-footer {
+            margin-top: 18px;
             font-size: 0.7rem;
             color: var(--text-muted);
-            margin-top: var(--space-md);
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
         }
 
         .app-layout.blurred {
-            filter: blur(8px);
+            filter: blur(12px);
             pointer-events: none;
             user-select: none;
         }
@@ -1422,9 +1569,7 @@
             }
 
             .app-layout.blurred {
-                filter: none !important;
-                pointer-events: auto !important;
-                user-select: auto !important;
+                display: none !important;
             }
 
             .main-content {
@@ -1542,8 +1687,46 @@
     <!-- ===== TOAST ===== -->
     <div id="toast-container" class="toast-container"></div>
 
+    <!-- ===== LOGIN OVERLAY (Password Protected Gatekeeper) ===== -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-box" id="login-box">
+            <div class="login-header">
+                <img src="malc logo.png" alt="Marie Adelaide Leprosy Centre Logo" class="login-logo" />
+                <div class="login-badge">
+                    <span class="login-badge-dot"></span>
+                    <span>RESTRICTED ACCESS</span>
+                </div>
+                <h2>Zero Leprosy Dashboard</h2>
+                <p>Please enter the authorization password to unlock the project data sheets &amp; analytics.</p>
+            </div>
+            <form id="login-form" onsubmit="return false;">
+                <div class="login-input-wrap">
+                    <span class="login-input-icon">🔑</span>
+                    <input type="password" id="login-password" placeholder="Enter password..."
+                        autocomplete="current-password" spellcheck="false" required />
+                    <button type="button" id="btn-toggle-pwd" class="login-pwd-toggle" title="Show/Hide password"
+                        aria-label="Toggle password visibility">👁️</button>
+                </div>
+                <div id="login-error" class="login-error-msg" style="display: none;"></div>
+                <div class="login-options">
+                    <label class="remember-label">
+                        <input type="checkbox" id="login-remember" checked />
+                        <span>Remember access on this browser</span>
+                    </label>
+                </div>
+                <button type="submit" id="btn-login-submit" class="btn-login">
+                    <span>Unlock Dashboard</span>
+                    <span style="font-size: 1.05rem; margin-left: 6px;">🔓</span>
+                </button>
+            </form>
+            <div class="login-footer">
+                <span>Marie Adelaide Leprosy Centre (MALC) • Zero Leprosy Project 2025</span>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== APP LAYOUT ===== -->
-    <div class="app-layout" id="appLayout">
+    <div class="app-layout blurred" id="appLayout">
 
         <!-- Main Content -->
         <main class="main-content" id="main-content">
@@ -1578,7 +1761,12 @@
                             <div class="icons"><span>☀️</span><span>🌙</span></div>
                         </div>
                     </div>
-
+                    <button id="btn-logout" class="btn btn-logout"
+                        style="padding: 5px 12px; font-size: 0.74rem; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--radius-sm); cursor: pointer;"
+                        title="Lock Dashboard Session">
+                        <span>🔒</span>
+                        <span>Lock</span>
+                    </button>
                 </div>
             </div>
 
@@ -2252,12 +2440,134 @@
                 dataStatusText: $('#data-status-text'),
                 dataTimestamp: $('#data-timestamp'),
                 themeSwitch: $('#theme-switch'),
+                loginOverlay: $('#login-overlay'),
+                loginBox: $('#login-box'),
+                loginForm: $('#login-form'),
+                loginPassword: $('#login-password'),
+                loginError: $('#login-error'),
+                loginRemember: $('#login-remember'),
+                btnTogglePwd: $('#btn-toggle-pwd'),
+                appLayout: $('#appLayout'),
                 editModal: $('#edit-modal'),
                 modalTbody: $('#modal-tbody'),
                 modalClose: $('#modal-close'),
                 modalCancel: $('#modal-cancel'),
                 modalSave: $('#modal-save'),
             };
+
+            // ─── Authentication & Security Gatekeeper ─────
+            const AUTH_KEY = 'zl_dashboard_auth';
+            const SYSTEM_PASSWORD = 'zerolep2025';
+
+            function isUserAuthenticated() {
+                try {
+                    return sessionStorage.getItem(AUTH_KEY) === 'true' || localStorage.getItem(AUTH_KEY) === 'true';
+                } catch (e) {
+                    return false;
+                }
+            }
+
+            function setAuthenticated(remember) {
+                try {
+                    sessionStorage.setItem(AUTH_KEY, 'true');
+                    if (remember) {
+                        localStorage.setItem(AUTH_KEY, 'true');
+                    } else {
+                        localStorage.removeItem(AUTH_KEY);
+                    }
+                } catch (e) { }
+            }
+
+            function clearAuthentication() {
+                try {
+                    sessionStorage.removeItem(AUTH_KEY);
+                    localStorage.removeItem(AUTH_KEY);
+                } catch (e) { }
+            }
+
+            function showLoginOverlay() {
+                if (dom.loginOverlay) {
+                    dom.loginOverlay.classList.remove('hidden');
+                }
+                if (dom.appLayout) {
+                    dom.appLayout.classList.add('blurred');
+                }
+                if (dom.loginPassword) {
+                    dom.loginPassword.value = '';
+                    dom.loginPassword.classList.remove('error');
+                    setTimeout(function () {
+                        try { dom.loginPassword.focus(); } catch (e) { }
+                    }, 150);
+                }
+                if (dom.loginError) {
+                    dom.loginError.style.display = 'none';
+                    dom.loginError.textContent = '';
+                }
+            }
+
+            function hideLoginOverlay() {
+                if (dom.loginOverlay) {
+                    dom.loginOverlay.classList.add('hidden');
+                }
+                if (dom.appLayout) {
+                    dom.appLayout.classList.remove('blurred');
+                }
+            }
+
+            function handleLoginSubmit(e) {
+                if (e && e.preventDefault) e.preventDefault();
+                var pwd = (dom.loginPassword ? dom.loginPassword.value : '').trim();
+                if (!pwd) {
+                    showLoginError('Please enter the dashboard password.');
+                    return;
+                }
+
+                if (pwd === SYSTEM_PASSWORD) {
+                    var remember = dom.loginRemember ? dom.loginRemember.checked : true;
+                    setAuthenticated(remember);
+                    if (dom.loginError) dom.loginError.style.display = 'none';
+                    if (dom.loginPassword) dom.loginPassword.classList.remove('error');
+
+                    if (dom.loginBox) {
+                        dom.loginBox.style.transform = 'scale(1.02)';
+                        dom.loginBox.style.borderColor = '#10b981';
+                    }
+
+                    setTimeout(function () {
+                        hideLoginOverlay();
+                        toast('Dashboard unlocked! 🔓', 'success');
+                        if (dom.loginBox) {
+                            dom.loginBox.style.transform = '';
+                            dom.loginBox.style.borderColor = '';
+                        }
+                    }, 250);
+                } else {
+                    showLoginError('Incorrect password! Please try again.');
+                    if (dom.loginBox) {
+                        dom.loginBox.classList.remove('shake');
+                        void dom.loginBox.offsetWidth; // force reflow
+                        dom.loginBox.classList.add('shake');
+                    }
+                    if (dom.loginPassword) {
+                        dom.loginPassword.classList.add('error');
+                        dom.loginPassword.focus();
+                        dom.loginPassword.select();
+                    }
+                }
+            }
+
+            function showLoginError(msg) {
+                if (dom.loginError) {
+                    dom.loginError.innerHTML = '<span>⚠️</span> <span>' + msg + '</span>';
+                    dom.loginError.style.display = 'flex';
+                }
+            }
+
+            function logout() {
+                clearAuthentication();
+                showLoginOverlay();
+                toast('Dashboard locked. 🔒', 'info');
+            }
 
             // ─── Theme ─────────────────────────────────────
             function setTheme(theme) {
@@ -3841,6 +4151,28 @@
 
                 if (dom.btnLogout) dom.btnLogout.addEventListener('click', logout);
 
+                if (dom.loginForm) {
+                    dom.loginForm.addEventListener('submit', handleLoginSubmit);
+                }
+
+                if (dom.btnTogglePwd && dom.loginPassword) {
+                    dom.btnTogglePwd.addEventListener('click', function () {
+                        var isPassword = dom.loginPassword.type === 'password';
+                        dom.loginPassword.type = isPassword ? 'text' : 'password';
+                        dom.btnTogglePwd.textContent = isPassword ? '🙈' : '👁️';
+                        dom.btnTogglePwd.setAttribute('aria-label', isPassword ? 'Hide password' : 'Show password');
+                    });
+                }
+
+                if (dom.loginPassword) {
+                    dom.loginPassword.addEventListener('input', function () {
+                        if (dom.loginPassword.classList.contains('error')) {
+                            dom.loginPassword.classList.remove('error');
+                            if (dom.loginError) dom.loginError.style.display = 'none';
+                        }
+                    });
+                }
+
                 if (dom.regionSelect) {
                     dom.regionSelect.addEventListener('change', function () {
                         switchRegion(dom.regionSelect.value);
@@ -4006,6 +4338,13 @@
                     updateDataStatus(false, 0);
                 }
                 bindEvents();
+
+                // Gatekeeper Security Check
+                if (isUserAuthenticated()) {
+                    hideLoginOverlay();
+                } else {
+                    showLoginOverlay();
+                }
             }
 
             document.addEventListener('DOMContentLoaded', init);
