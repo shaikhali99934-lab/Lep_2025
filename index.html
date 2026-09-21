@@ -1,237 +1,4018 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Zero Leprosy Project 2025 - Karachi Analytical Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Zero Leprosy Project — Target vs Achievement Dashboard" />
+    <title>Zero Leprosy — Dashboard</title>
+    <style>
+        /* ===== CSS Variables & Reset ===== */
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-glass: rgba(0, 0, 0, 0.03);
+            --bg-card: rgba(0, 0, 0, 0.02);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --accent-1: #06b6d4;
+            --accent-2: #0891b2;
+            --accent-3: #8b5cf6;
+            --accent-4: #10b981;
+            --accent-5: #f59e0b;
+            --gradient-primary: linear-gradient(135deg, #06b6d4, #0891b2);
+            --shadow-sm: 0 4px 20px rgba(6, 182, 212, 0.15);
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 16px;
+            --space-xs: 6px;
+            --space-sm: 10px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --transition-fast: 0.2s ease;
+            --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
 
-  <!-- Modern Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
-    rel="stylesheet">
+        [data-theme="dark"] {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-glass: rgba(255, 255, 255, 0.04);
+            --bg-card: rgba(255, 255, 255, 0.03);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --shadow-sm: 0 4px 20px rgba(6, 182, 212, 0.15);
+        }
 
-  <!-- Chart.js for Analytics Visualizations -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-  <!-- Dashboard Stylesheet -->
-  <link rel="stylesheet" href="styles.css">
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent-1);
+            border-radius: 10px;
+        }
+
+        /* ===== LOGIN OVERLAY ===== */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-primary);
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        .login-overlay.hidden {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl) var(--space-lg);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-box .lock-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .login-box h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: var(--space-xs);
+        }
+
+        .login-box p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .login-box .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+
+        .login-box input[type="password"] {
+            padding: var(--space-sm) var(--space-md);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .login-box input[type="password"]:focus {
+            border-color: var(--accent-1);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.15);
+        }
+
+        .login-box .btn-login {
+            width: 100%;
+            padding: var(--space-sm) var(--space-lg);
+            border: none;
+            border-radius: var(--radius-sm);
+            background: var(--gradient-primary);
+            color: #fff;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+
+        .login-box .btn-login:hover {
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .login-box .error-msg {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: var(--space-sm);
+            min-height: 1.5em;
+        }
+
+        .login-box .brand-sub {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: var(--space-md);
+        }
+
+        .app-layout.blurred {
+            filter: blur(8px);
+            pointer-events: none;
+            user-select: none;
+        }
+
+        /* ===== Spinner ===== */
+        .spinner-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 23, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .spinner-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(6, 182, 212, 0.15);
+            border-top-color: var(--accent-1);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ===== Toast ===== */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9998;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-width: 380px;
+            width: 100%;
+        }
+
+        .toast {
+            padding: 12px 18px;
+            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--accent-1);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(40px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== App Layout (full width) ===== */
+        .app-layout {
+            display: block;
+            min-height: 100vh;
+            transition: filter 0.5s ease;
+        }
+
+        /* ===== Main Content ===== */
+        .main-content {
+            padding: var(--space-lg) var(--space-xl);
+            max-width: 100%;
+        }
+
+        @media (max-width: 640px) {
+            .main-content {
+                padding: var(--space-md);
+            }
+        }
+
+        /* ===== Empty State ===== */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 3px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--space-xl);
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .empty-state.drag-over {
+            border-color: var(--accent-1);
+            background: rgba(6, 182, 212, 0.05);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: var(--space-sm);
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .drop-hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: var(--space-sm);
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-xs);
+            padding: 0 var(--space-sm);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background: var(--bg-glass);
+            color: var(--text-primary);
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-family: inherit;
+            height: 32px;
+            min-width: 130px;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background: rgba(128, 128, 128, 0.08);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .btn-edit {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-edit:hover {
+            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-reload {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-reload:hover {
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-pdf {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-pdf:hover {
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-export-excel {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-export-excel:hover {
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-export-csv {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-export-csv:hover {
+            box-shadow: 0 4px 20px rgba(2, 132, 199, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-key-indicators {
+            background: linear-gradient(135deg, #10b981, #047857);
+            border-color: transparent;
+            color: #fff;
+            position: relative;
+        }
+
+        .btn-key-indicators:hover {
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .btn-key-indicators.active {
+            background: linear-gradient(135deg, #059669, #065f46);
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35), 0 4px 20px rgba(16, 185, 129, 0.5);
+            border: 1px solid #34d399;
+        }
+
+        .key-badge {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            margin-left: 6px;
+        }
+
+        .key-indicator-row {
+            background: rgba(16, 185, 129, 0.05) !important;
+            border-left: 4px solid #10b981 !important;
+        }
+
+        [data-theme="dark"] .key-indicator-row {
+            background: rgba(16, 185, 129, 0.08) !important;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #64748b, #475569);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .btn-logout:hover {
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .detail-row {
+            background: rgba(0, 0, 0, 0.03);
+            transition: background 0.2s ease;
+        }
+
+        [data-theme="dark"] .detail-row {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .expand-btn {
+            background: none;
+            border: none;
+            color: var(--accent-1);
+            cursor: pointer;
+            font-size: 0.75rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: transform 0.2s;
+        }
+
+        .expand-btn:hover {
+            background: var(--bg-glass);
+        }
+
+        .mini-month-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.7rem;
+            margin: 6px 0;
+        }
+
+        .mini-month-table th,
+        .mini-month-table td {
+            padding: 4px 6px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .mini-month-table th {
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        /* ===== Regional Ribbon & Badges ===== */
+        .region-badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.73rem;
+            font-weight: 600;
+            background: rgba(6, 182, 212, 0.12);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            color: var(--accent-1);
+        }
+
+        .regional-ribbon-container {
+            margin-top: var(--space-xs);
+            margin-bottom: var(--space-md);
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
+        }
+
+        .regional-ribbon-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .regional-ribbon-title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+        }
+
+        .regional-ribbon-hint {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        .regional-chips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 8px;
+        }
+
+        .regional-chip {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .regional-chip:hover {
+            border-color: var(--accent-1);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+        }
+
+        .regional-chip.active {
+            border-color: var(--accent-1);
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(16, 185, 129, 0.08));
+            box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.35);
+        }
+
+        .regional-chip-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 4px;
+        }
+
+        .chip-name {
+            font-size: 0.74rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chip-pct {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        .regional-chip-sub {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+        }
+
+        .chip-divider {
+            opacity: 0.5;
+        }
+
+
+        /* ===== KPI Grid (Sticky) ===== */
+        .kpi-sticky-wrapper {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--bg-primary);
+            padding: var(--space-md) 0;
+            margin: 0 0 var(--space-md) 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: var(--space-md);
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            text-align: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            will-change: transform;
+        }
+
+        .kpi-card:hover {
+            transform: scale(1.08) translateY(-4px);
+            border-color: var(--accent-1);
+            box-shadow: 0 12px 30px rgba(6, 182, 212, 0.28), 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 10;
+        }
+
+        .malc-logo {
+            height: 46px;
+            width: auto;
+            max-width: 170px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.15));
+            border-radius: var(--radius-sm);
+        }
+
+        .malc-logo:hover {
+            transform: scale(1.05);
+        }
+
+        [data-theme="dark"] .malc-logo {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 4px 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .kpi-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+
+        .kpi-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .kpi-value.achieved {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-value.partial {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-value.over-achieved {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-value.not-achieved {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-value.main-activities {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-value.zero-target {
+            background: linear-gradient(135deg, #94a3b8, #64748b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .kpi-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 2px;
+        }
+
+        .kpi-sub {
+            font-size: 0.6rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            align-items: center;
+        }
+
+        .kpi-sub .sub-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.6rem;
+        }
+
+        .dot-primary {
+            color: var(--accent-1);
+        }
+
+        .dot-green {
+            color: #10b981;
+        }
+
+        .dot-yellow {
+            color: #f59e0b;
+        }
+
+        .dot-red {
+            color: #ef4444;
+        }
+
+        .dot-planned {
+            color: var(--text-muted);
+        }
+
+        /* ===== Data Table ===== */
+        .table-section {
+            margin-top: var(--space-md);
+        }
+
+        .table-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            background: var(--bg-card);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-toolbar .filters {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+            flex: 1;
+        }
+
+        .table-toolbar .action-buttons {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            background: var(--bg-glass);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-group label {
+            font-size: 0.65rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+        }
+
+        .filter-select {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 0.75rem;
+            padding: var(--space-xs) var(--space-sm);
+            outline: none;
+            cursor: pointer;
+            max-width: 200px;
+        }
+
+        .filter-select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            background: var(--bg-card);
+            padding: 4px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            min-width: 700px;
+        }
+
+        .table-container th,
+        .table-container td {
+            padding: 6px 10px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .table-container th {
+            background: rgba(255, 255, 255, 0.02);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .table-container .activity-label {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 80px;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 4px;
+            display: inline-block;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        .progress-bar .fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        .status-badge {
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.6rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge.fully {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .status-badge.partial {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+        }
+
+        .status-badge.notstarted {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        .status-badge.zerotarget {
+            background: rgba(148, 163, 184, 0.16);
+            color: var(--text-muted);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        /* ===== Activity KPI Cards View ===== */
+        .cards-section {
+            margin-top: var(--space-md);
+        }
+
+        .cards-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+            padding: var(--space-xs) var(--space-sm);
+            background: var(--bg-card);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .outcome-pills-nav {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .pill-btn {
+            border: 1px solid var(--border-color);
+            background: var(--bg-glass);
+            color: var(--text-secondary);
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .pill-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--accent-1);
+            background: rgba(6, 182, 212, 0.1);
+        }
+
+        .pill-btn.active {
+            background: var(--gradient-primary);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 2px 8px rgba(6, 182, 212, 0.35);
+        }
+
+        .activity-kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: var(--space-md);
+        }
+
+        @media (max-width: 480px) {
+            .activity-kpi-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .activity-kpi-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .activity-kpi-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-1);
+            box-shadow: 0 10px 25px rgba(6, 182, 212, 0.18), 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .activity-kpi-card.key-indicator-card {
+            border-left: 4px solid #10b981;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.04) 0%, var(--bg-secondary) 100%);
+        }
+
+        .activity-card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .activity-card-code-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .activity-card-code {
+            font-size: 0.85rem;
+            font-weight: 800;
+            color: var(--accent-1);
+            letter-spacing: 0.02em;
+            background: rgba(6, 182, 212, 0.1);
+            padding: 2px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(6, 182, 212, 0.25);
+        }
+
+        .activity-card-outcome-tag {
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            padding: 2px 8px;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+
+        .activity-card-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            line-height: 1.4;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+            min-height: 38px;
+        }
+
+        .activity-card-metric-box {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            margin-bottom: 12px;
+        }
+
+        .activity-card-metric-header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .activity-card-pct {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .activity-card-pct.fully {
+            color: #10b981;
+        }
+
+        .activity-card-pct.partial {
+            color: #f59e0b;
+        }
+
+        .activity-card-pct.notstarted {
+            color: #ef4444;
+        }
+
+        .activity-card-targets {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            margin-top: 6px;
+        }
+
+        .activity-quarter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .quarter-mini-box {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 4px;
+            text-align: center;
+        }
+
+        .quarter-mini-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .quarter-mini-val {
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-top: 2px;
+            color: var(--text-primary);
+        }
+
+        .quarter-mini-pct {
+            font-size: 0.6rem;
+            font-weight: 600;
+            margin-top: 2px;
+        }
+
+        .quarter-mini-bar {
+            height: 3px;
+            background: var(--border-color);
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+
+        .quarter-mini-bar .fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .card-expand-btn {
+            width: 100%;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--accent-1);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-family: inherit;
+        }
+
+        .card-expand-btn:hover {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--accent-1);
+        }
+
+        .card-month-details {
+            margin-top: 10px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 10px;
+            display: none;
+        }
+
+        .card-month-details.visible {
+            display: block;
+        }
+
+        /* ===== Edit Modal ===== */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            max-width: 95%;
+            width: 1200px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0 8px;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: var(--space-md) var(--space-lg);
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-body table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            min-width: 900px;
+        }
+
+        .modal-body th,
+        .modal-body td {
+            padding: 4px 6px;
+            border: 1px solid var(--border-color);
+            text-align: center;
+        }
+
+        .modal-body th {
+            background: var(--bg-glass);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+
+        .modal-body input[type="number"] {
+            width: 50px;
+            padding: 2px 4px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .modal-body input[type="number"]:focus {
+            outline: 2px solid var(--accent-1);
+            outline-offset: 1px;
+        }
+
+        .modal-body .activity-label {
+            text-align: left;
+            font-weight: 500;
+            font-size: 0.7rem;
+            min-width: 160px;
+        }
+
+        .modal-footer {
+            padding: var(--space-md) var(--space-lg);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: var(--space-sm);
+            flex-shrink: 0;
+        }
+
+        /* ===== Data status bar ===== */
+        .data-status-bar {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .data-status-bar .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+        }
+
+        .data-status-bar .dot.loaded {
+            background: #10b981;
+        }
+
+        .data-status-bar .dot.empty {
+            background: #64748b;
+        }
+
+        .data-status-bar .timestamp {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== Theme toggle ===== */
+        .theme-toggle-top {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .theme-toggle-top label {
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .theme-toggle-top .theme-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .theme-toggle-top .theme-switch .thumb {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background: var(--accent-1);
+            border-radius: 50%;
+            transition: transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .theme-toggle-top .theme-switch .thumb {
+            transform: translateX(20px);
+        }
+
+        .theme-toggle-top .theme-switch .icons {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 4px;
+            font-size: 0.6rem;
+            line-height: 22px;
+            color: var(--text-muted);
+        }
+
+        /* ===== Print Styles ===== */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .login-overlay {
+                display: none !important;
+            }
+
+            .app-layout.blurred {
+                filter: none !important;
+                pointer-events: auto !important;
+                user-select: auto !important;
+            }
+
+            .main-content {
+                padding: 20px !important;
+                max-width: 100% !important;
+            }
+
+            .table-container {
+                max-height: none !important;
+                overflow: visible !important;
+            }
+
+            .kpi-sticky-wrapper {
+                position: static !important;
+                background: #fff !important;
+                border-bottom: 1px solid #ccc !important;
+            }
+
+            .kpi-grid {
+                display: grid !important;
+                grid-template-columns: repeat(6, 1fr) !important;
+                gap: 8px !important;
+            }
+
+            .kpi-card {
+                border: 1px solid #ddd !important;
+                background: #f9f9f9 !important;
+            }
+
+            .kpi-value {
+                -webkit-text-fill-color: initial !important;
+                background: none !important;
+                color: #000 !important;
+            }
+
+            .kpi-value.achieved {
+                color: #10b981 !important;
+            }
+
+            .kpi-value.partial {
+                color: #f59e0b !important;
+            }
+
+            .kpi-value.not-achieved {
+                color: #ef4444 !important;
+            }
+
+            .kpi-value.over-achieved {
+                color: #f59e0b !important;
+            }
+
+            .kpi-value.main-activities {
+                color: #0891b2 !important;
+            }
+
+            .kpi-value.zero-target {
+                color: #64748b !important;
+            }
+
+            .data-status-bar,
+            .theme-toggle-top {
+                display: none !important;
+            }
+
+            .table-container th {
+                background: #f1f5f9 !important;
+                color: #1e293b !important;
+            }
+
+            .table-container td {
+                border-bottom: 1px solid #e2e8f0 !important;
+            }
+
+            .progress-bar {
+                border: 1px solid #ddd !important;
+            }
+
+            .status-badge {
+                border: 1px solid currentColor !important;
+            }
+
+            body {
+                background: #fff !important;
+                color: #000 !important;
+            }
+
+            .toast-container,
+            .spinner-overlay,
+            .modal-overlay {
+                display: none !important;
+            }
+
+            .filter-group {
+                border: 1px solid #ddd !important;
+            }
+
+            .filter-select {
+                color: #000 !important;
+            }
+
+            .filter-select option {
+                color: #000 !important;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-  <div class="dashboard-container">
-
-    <!-- 1. Top Header Banner -->
-    <header class="header-banner">
-      <div class="header-left-wrap">
-        <div class="logo-box">
-          <img src="malc logo.png" alt="Marie Adelaide Leprosy Centre Logo" class="malc-logo-img">
-        </div>
-        <div>
-          <div class="org-tagline">
-            <span>🏥</span> Marie Adelaide Leprosy Centre, Karachi
-          </div>
-          <h1 class="banner-title">
-            ZERO Leprosy Project 2025
-            <span class="region-badge" id="banner-region-badge">🇵🇰 All Consolidated Provinces</span>
-          </h1>
-          <p class="banner-subtitle" id="banner-subtitle">
-            Analytical Target vs. Achievement Performance Dashboard • 87 Activities
-          </p>
-        </div>
-      </div>
-
-      <!-- Top Right Corner Heading -->
-      <div class="header-corner-heading" id="header-corner-heading" data-title="Analystical Dashboard"
-        title="Analytical Dashboard">
-        <h2 class="corner-heading-tag">
-          <span class="corner-heading-icon">📊</span>
-          <span class="corner-heading-text">Analytical Dashboard</span>
-        </h2>
-      </div>
-
-      <div class="header-actions">
-        <!-- Region / Province Dropdown Selector -->
-        <div class="region-selector-box">
-          <label for="select-region" class="region-selector-label">📍 Region / Province:</label>
-          <select id="select-region" class="region-selector-dropdown"
-            title="Select Province or National Consolidated Dashboard">
-            <option value="consolidated" selected>🇵🇰 All Consolidated Provinces</option>
-            <option value="karachi">🏙️ Karachi</option>
-            <option value="interior_sindh">🌾 Interior Sindh</option>
-            <option value="balochistan">⛰️ Balochistan</option>
-            <option value="kpk">🏔️ Khyber Pakhtunkhwa</option>
-            <option value="azad_kashmir">🌲 Azad Kashmir</option>
-            <option value="gilgit_baltistan">❄️ Gilgit Baltistan</option>
-            <option value="hq_training">🎓 HQ-Training</option>
-          </select>
-        </div>
-
-        <button id="theme-toggle-btn" class="btn" title="Toggle Dark/Light Mode">
-          🌙 Theme
-        </button>
-        <button id="btn-export-csv" class="btn btn-primary" title="Export Current Filtered Data to CSV">
-          <span>📥</span> Export CSV
-        </button>
-      </div>
-    </header>
-
-    <!-- 2. Outcomes 1 to 5 Cards - Placed on Top -->
-    <section class="tier-section" style="margin-bottom: 1.5rem;">
-      <div class="outcomes-kpi-grid" id="outcomes-kpi-grid">
-        <!-- Populated via JS -->
-      </div>
-    </section>
-
-    <!-- 3. Filter Area & Controls Toolbar -->
-    <section class="toolbar-wrap" style="margin-bottom: 1.25rem;">
-      <div class="filters-group">
-        <!-- Target Achievement Dropdown Filter -->
-        <div class="filter-item-wrap">
-          <label for="filter-status" class="filter-label">🎯 Achievement Status:</label>
-          <select id="filter-status" class="filter-select highlight-filter"
-            title="Filter activities by target achievement status">
-            <option value="all">🚦 All Statuses (87)</option>
-            <option value="fully_achieved">✓ Target Achieved (≥70%)</option>
-            <option value="partially_achieved">▲ Partially Achieved (50% – 69%)</option>
-            <option value="not_achieved">✕ Not Achieved (&lt;50%)</option>
-            <option value="no_target">⚪ No Target Assigned</option>
-          </select>
-        </div>
-
-        <!-- Quarter Period Filter -->
-        <div class="filter-item-wrap">
-          <label for="filter-quarter" class="filter-label">📅 Period:</label>
-          <select id="filter-quarter" class="filter-select" title="Select Reporting Quarter">
-            <option value="all">Full Year 2025</option>
-            <option value="Q1">Quarter 1 (Jan - Mar)</option>
-            <option value="Q2">Quarter 2 (Apr - Jun)</option>
-            <option value="Q3">Quarter 3 (Jul - Sep)</option>
-            <option value="Q4">Quarter 4 (Oct - Dec)</option>
-          </select>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="search-input-wrap">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="search-input" class="search-input" placeholder="Search activities..."
-            title="Type to search by code or title">
-        </div>
-
-        <!-- Reset Button -->
-        <button id="btn-reset-filters" class="btn" title="Reset all filters to default">
-          🔄 Reset
-        </button>
-      </div>
-
-      <!-- View Switcher -->
-      <div class="view-switcher-group">
-        <button class="view-btn active" data-view="cards" title="Activity KPI Cards View">
-          <span>🗂️</span> Cards
-        </button>
-        <button class="view-btn" data-view="matrix" title="Excel Matrix Table View">
-          <span>📊</span> Matrix Table
-        </button>
-        <button class="view-btn" data-view="charts" title="Visual Analytics Charts">
-          <span>📈</span> Analytics
-        </button>
-      </div>
-    </section>
-
-    <!-- 5. Active Result Count Header -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <div id="filtered-count-badge" style="font-size: 0.9rem; font-weight: 600; color: var(--text-secondary);">
-        Showing 87 of 87 activities
-      </div>
+    <!-- ===== SPINNER ===== -->
+    <div id="spinner" class="spinner-overlay">
+        <div class="spinner"></div>
     </div>
 
-    <!-- 6. View Container 1: Activity KPI Cards View -->
-    <main id="section-cards-view">
-      <div class="activities-grid" id="activities-cards-grid">
-        <!-- Dynamically rendered via app.js -->
-      </div>
-    </main>
+    <!-- ===== TOAST ===== -->
+    <div id="toast-container" class="toast-container"></div>
 
-    <!-- 7. View Container 2: Excel Matrix Table View -->
-    <main id="section-matrix-view" style="display: none;">
-      <div class="matrix-view-header">
-        <div class="matrix-hint-pill">
-          <span>↔</span> Scroll right to view Q1–Q4 Quarters &amp; Grand Total
+    <!-- ===== APP LAYOUT ===== -->
+    <div class="app-layout" id="appLayout">
+
+        <!-- Main Content -->
+        <main class="main-content" id="main-content">
+
+            <!-- Top Bar -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-md); margin-bottom: var(--space-md); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--border-color);">
+                <div style="display: flex; align-items: center; gap: var(--space-md);">
+                    <img src="malc logo.png" alt="Marie Adelaide Leprosy Centre Logo" class="malc-logo" />
+                    <div style="border-left: 2px solid var(--accent-1); padding-left: var(--space-md);">
+                        <h1
+                            style="font-size: 1.2rem; font-weight: 700; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1.2; letter-spacing: 0.02em;">
+                            ZERO LEPROSY PROJECT 2025 ANALYTICS </h1>
+                        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 2px;">
+                            <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">Target vs
+                                Achievement Tracker — Marie Adelaide Leprosy Centre</span>
+                            <span id="active-region-pill" class="region-badge-pill">🌐 All Regions (Consolidated)</span>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--space-md); flex-wrap: wrap;">
+                    <div class="data-status-bar">
+                        <span class="dot empty" id="data-status-dot"></span>
+                        <span id="data-status-text">No data loaded</span>
+                        <span class="timestamp" id="data-timestamp"></span>
+                    </div>
+                    <div class="theme-toggle-top">
+                        <label for="theme-switch">🌓 Theme</label>
+                        <div class="theme-switch" id="theme-switch" role="button" tabindex="0"
+                            aria-label="Toggle theme">
+                            <div class="thumb"></div>
+                            <div class="icons"><span>☀️</span><span>🌙</span></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="empty-state">
+                <img src="malc logo.png" alt="Marie Adelaide Leprosy Centre Logo" class="malc-logo"
+                    style="height:60px; max-width:220px; margin-bottom: 12px;" />
+                <h3>Zero Leprosy — Target vs Achievement Dashboard</h3>
+                <p>Click <strong>"Browse for Excel File"</strong> below or <strong>drag & drop</strong> your updated
+                    <strong>Zero Leprosy Target Sheet.xlsx</strong> anywhere on this page.
+                </p>
+                <div class="drop-hint">📂 Drag & drop your Excel file here</div>
+                <br />
+                <button class="btn btn-primary" id="btn-load-from-empty">📂 &nbsp;Browse for Excel File</button>
+            </div>
+
+            <!-- Dashboard -->
+            <div id="dashboard" style="display:none;">
+
+
+                <div
+                    style="margin-bottom: var(--space-md); display: flex; flex-wrap: wrap; gap: var(--space-sm); justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                        <button id="btn-view-table" class="btn btn-primary">📋 Table View</button>
+                        <button id="btn-view-charts" class="btn">📊 Charts View</button>
+                        <button id="btn-view-cards" class="btn">🗂️ Activity KPI Cards</button>
+                        <button id="btn-key-indicators" class="btn btn-key-indicators"
+                            title="Filter & analyze Green formatted Key Indicators">⭐ Key Indicators <span
+                                id="key-indicators-count"
+                                style="font-weight:700; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:10px; font-size:0.65rem; margin-left:4px;">(7)</span></button>
+                    </div>
+                    <div class="action-buttons" style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                        <button class="btn btn-edit no-print" id="btn-edit-data">✏️ &nbsp;Edit Data</button>
+                        <button class="btn btn-pdf no-print" id="btn-pdf">🖨️ &nbsp;Print/PDF</button>
+                    </div>
+                </div>
+
+                <!-- KPI Grid (Sticky) -->
+                <div class="kpi-sticky-wrapper">
+                    <div class="kpi-grid" id="kpi-grid">
+                        <!-- Card 1: Total Activities -->
+                        <div class="kpi-card" id="kpi-card-active" title="Total Activities (Click to show all)">
+                            <div class="kpi-icon">🎯</div>
+                            <div class="kpi-value main-activities" id="kpi-main-activities">0</div>
+                            <div class="kpi-label">Total Activities</div>
+                            <div class="kpi-sub">
+                                <div class="sub-row"><span class="dot-planned">●</span>Total Planned:
+                                    <span id="kpi-total-planned">0</span>
+                                </div>
+                                <div class="sub-row"
+                                    style="margin-top:2px; font-size:0.65rem; color:var(--text-muted);">
+                                    (<span id="kpi-active-activities-count">0</span> Active | <span
+                                        id="kpi-zero-sub-count">0</span> Zero Target)
+                                </div>
+                                <span id="kpi-sub-activities" style="display: none;"></span>
+                            </div>
+                        </div>
+                        <!-- Card 2: Overall Achievement -->
+                        <div class="kpi-card">
+                            <div class="kpi-icon">📊</div>
+                            <div class="kpi-value" id="kpi-overall-achievement">0%</div>
+                            <div class="kpi-label">Overall Achievement <span id="kpi-star"
+                                    style="font-size:1rem;"></span></div>
+                        </div>
+                        <!-- Card 3: Fully Achieved -->
+                        <div class="kpi-card" id="kpi-card-fully" title="Click to filter Fully Achieved (≥70%)">
+                            <div class="kpi-icon">✅</div>
+                            <div class="kpi-value achieved" id="kpi-fully-achieved">0</div>
+                            <div class="kpi-label">Fully Achieved (≥70%)</div>
+                        </div>
+                        <!-- Card 4: Partially Achieved -->
+                        <div class="kpi-card" id="kpi-card-partial" title="Click to filter Partially Achieved (51-69%)">
+                            <div class="kpi-icon">⏳</div>
+                            <div class="kpi-value partial" id="kpi-partial-achieved">0</div>
+                            <div class="kpi-label">Partially Achieved (51-69%)</div>
+                        </div>
+                        <!-- Card 5: Not Achieved -->
+                        <div class="kpi-card" id="kpi-card-not" title="Click to filter Not Achieved (≤50%)">
+                            <div class="kpi-icon">❌</div>
+                            <div class="kpi-value not-achieved" id="kpi-not-achieved">0</div>
+                            <div class="kpi-label">Not Achieved (≤50%)</div>
+                        </div>
+                        <!-- Card 6: Zero Target & Achieved -->
+                        <div class="kpi-card" id="kpi-card-zero-target"
+                            title="Activities with 0 target and 0 achievement (Click to filter)">
+                            <div class="kpi-icon">⚪</div>
+                            <div class="kpi-value zero-target" id="kpi-zero-target">0</div>
+                            <div class="kpi-label">Zero Target & Achieved</div>
+                            <div class="kpi-sub">
+                                <div class="sub-row" style="color:var(--text-muted); font-size:0.65rem;">No Target
+                                    Assigned</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Regional Performance Snapshot Ribbon -->
+                <div class="regional-ribbon-container" id="regional-ribbon">
+                    <div class="regional-ribbon-header">
+                        <span class="regional-ribbon-title">📍 Regional Performance Overview (2025 Data Sheets)</span>
+                        <span class="regional-ribbon-hint">Click any region chip below to switch view</span>
+                    </div>
+                    <div class="regional-chips-grid" id="regional-chips-grid"></div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section no-print" id="charts-section"
+                    style="margin-top: var(--space-md); margin-bottom: var(--space-lg); display: none;">
+                    <div
+                        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--space-md);">
+                        <!-- Chart 4: Regional Comparison Bar Chart -->
+                        <div class="chart-card"
+                            style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); min-height: 280px; position: relative; grid-column: 1 / -1;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-sm); flex-wrap: wrap; gap: 8px;">
+                                <h3 id="chart-region-title"
+                                    style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin: 0;">
+                                    📍 Regional Comparison — Target vs Achievement across Provinces / Regions</h3>
+                                <div id="chart-region-mode-toggles" style="display: none; gap: 6px;">
+                                    <button class="pill-btn active" id="btn-chart-reg-quarterly"
+                                        style="font-size:0.68rem; padding: 3px 10px;">📅 Quarterly (Q1–Q4)</button>
+                                    <button class="pill-btn" id="btn-chart-reg-key"
+                                        style="font-size:0.68rem; padding: 3px 10px;">⭐ Key Indicators</button>
+                                    <button class="pill-btn" id="btn-chart-reg-compare"
+                                        style="font-size:0.68rem; padding: 3px 10px;">🌐 Province Benchmark</button>
+                                </div>
+                            </div>
+                            <div style="height: 240px; position: relative;"><canvas id="chart-region"></canvas></div>
+                        </div>
+                        <!-- Chart 3: Monthly Progress Trend Line Chart -->
+                        <div class="chart-card"
+                            style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); min-height: 280px; position: relative; grid-column: 1 / -1;">
+                            <h3
+                                style="font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">
+                                📈 Monthly Progress Trend (Jan – Dec)</h3>
+                            <div style="height: 220px; position: relative;"><canvas id="chart-trend"></canvas></div>
+                        </div>
+                        <!-- Chart 1: Outcome Comparison Bar Chart -->
+                        <div class="chart-card"
+                            style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); min-height: 280px; position: relative; grid-column: 1 / -1;">
+                            <h3
+                                style="font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">
+                                🎯 Target vs Achievement by Outcome</h3>
+                            <div style="height: 220px; position: relative;"><canvas id="chart-outcome"></canvas></div>
+                        </div>
+                        <!-- Chart 2: Status Breakdown Doughnut Chart -->
+                        <div class="chart-card"
+                            style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); min-height: 280px; position: relative;">
+                            <h3
+                                style="font-size: 0.75rem; font-weight: 600; margin-bottom: var(--space-sm); color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em;">
+                                📊 Achievement Status Distribution</h3>
+                            <div style="height: 220px; position: relative;"><canvas id="chart-status"></canvas></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared Filters Toolbar -->
+                <div class="table-toolbar" id="main-filter-toolbar" style="margin-top: var(--space-md);">
+                    <div class="filters">
+                        <div class="filter-group">
+                            <label for="outcome-select">Outcome:</label>
+                            <select id="outcome-select" class="filter-select">
+                                <option value="all">All Outcomes</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="quarter-select">Quarter:</label>
+                            <select id="quarter-select" class="filter-select">
+                                <option value="all">All (Grand Total)</option>
+                                <option value="q1">Q1 (Jan–Mar)</option>
+                                <option value="q2">Q2 (Apr–Jun)</option>
+                                <option value="q3">Q3 (Jul–Sep)</option>
+                                <option value="q4">Q4 (Oct–Dec)</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="status-select">Status:</label>
+                            <select id="status-select" class="filter-select">
+                                <option value="all">All Statuses</option>
+                                <option value="fully">Fully Achieved (≥70%)</option>
+                                <option value="partial">Partially Achieved (51-69%)</option>
+                                <option value="notstarted">Not Achieved (≤50%)</option>
+                                <option value="zerotarget">Zero Target & Achieved</option>
+                            </select>
+                        </div>
+                        <div class="filter-group search-group" style="flex: 1; min-width: 220px;">
+                            <label for="search-input">Search:</label>
+                            <input type="text" id="search-input" class="search-input"
+                                placeholder="🔍 Search code or activity..."
+                                style="background: transparent; border: none; color: var(--text-primary); font-size: 0.75rem; width: 100%; outline: none;" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Section -->
+                <div class="table-section" id="table-section" style="margin-top: var(--space-sm);">
+                    <div class="table-container" id="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width:30px;"></th>
+                                    <th>Code</th>
+                                    <th style="text-align:left;">Activity</th>
+                                    <th style="text-align:left; min-width:220px;">Outcome</th>
+                                    <th>Planned</th>
+                                    <th>Achieved</th>
+                                    <th>%</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-tbody"></tbody>
+                            <tfoot id="table-tfoot"
+                                style="font-weight:700; background:var(--bg-glass); border-top:2px solid var(--border-color);">
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Activity KPI Cards Section -->
+                <div class="cards-section" id="cards-section" style="display: none; margin-top: var(--space-sm);">
+                    <div class="cards-toolbar">
+                        <div class="outcome-pills-nav" id="outcome-pills">
+                            <span
+                                style="font-size:0.7rem; font-weight:700; color:var(--text-muted); margin-right:4px;">QUICK
+                                FILTER:</span>
+                            <button class="pill-btn active" data-outcome="all">All Activities</button>
+                            <button class="pill-btn" data-outcome="1">Outcome 1 (Detection & SDR-PEP)</button>
+                            <button class="pill-btn" data-outcome="2">Outcome 2 (Care Services)</button>
+                            <button class="pill-btn" data-outcome="3">Outcome 3 (Programme Prep)</button>
+                            <button class="pill-btn" data-outcome="4">Outcome 4 (TB Control)</button>
+                            <button class="pill-btn" data-outcome="5">Outcome 5 (Accompanying)</button>
+                        </div>
+                        <div id="cards-counter-badge"
+                            style="font-size: 0.72rem; font-weight:600; color: var(--text-muted);">
+                            Showing <strong id="cards-visible-count" style="color:var(--accent-1);">0</strong> activity
+                            KPI cards
+                        </div>
+                    </div>
+                    <div class="activity-kpi-grid" id="activity-kpi-grid"></div>
+                </div>
+
+            </div><!-- /dashboard -->
+
+        </main>
+    </div>
+
+    <!-- ===== EDIT MODAL ===== -->
+    <div class="modal-overlay" id="edit-modal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2>✏️ Edit Planned / Achieved Values</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;min-width:160px;">Activity</th>
+                            <th style="text-align:left;min-width:180px;">Outcome</th>
+                            <th colspan="2">Jan</th>
+                            <th colspan="2">Feb</th>
+                            <th colspan="2">Mar</th>
+                            <th colspan="2">Apr</th>
+                            <th colspan="2">May</th>
+                            <th colspan="2">Jun</th>
+                            <th colspan="2">Jul</th>
+                            <th colspan="2">Aug</th>
+                            <th colspan="2">Sep</th>
+                            <th colspan="2">Oct</th>
+                            <th colspan="2">Nov</th>
+                            <th colspan="2">Dec</th>
+                        </tr>
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>A</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-tbody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" id="modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="modal-save">💾 Save Changes</button>
+            </div>
         </div>
-        <div class="matrix-scroll-actions">
-          <button id="btn-scroll-left" class="btn btn-sm" title="Scroll Table Left">◀ Scroll Left</button>
-          <button id="btn-scroll-right" class="btn btn-sm btn-primary" title="Scroll Table Right">Scroll Right
-            ▶</button>
-        </div>
-      </div>
-      <div class="table-container" id="table-matrix-container">
-        <!-- Dynamically rendered via app.js -->
-      </div>
-    </main>
+    </div>
 
-    <!-- 8. View Container 3: Visual Analytics Charts View -->
-    <main id="section-charts-view" style="display: none;">
-      <div class="charts-grid">
-        <!-- Chart 1: Outcome Targets vs Achievements -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">Target vs. Achieved by Strategic Outcome</h3>
-          </div>
-          <div class="chart-canvas-wrap">
-            <canvas id="chart-outcomes"></canvas>
-          </div>
-        </div>
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="regional_data.js"></script>
+    <script>
+        (function () {
+            'use strict';
 
-        <!-- Chart 2: Activity Health Status Distribution -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">Activity Delivery Health Distribution</h3>
-          </div>
-          <div class="chart-canvas-wrap">
-            <canvas id="chart-health"></canvas>
-          </div>
-        </div>
+            // Password protection disabled - Direct access enabled
 
-        <!-- Chart 3: Quarterly Output Momentum -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">Quarterly Performance Momentum (Q1 – Q4)</h3>
-          </div>
-          <div class="chart-canvas-wrap">
-            <canvas id="chart-quarterly"></canvas>
-          </div>
-        </div>
+            // ============================================================
+            //  DASHBOARD LOGIC
+            // ============================================================
 
-        <!-- Chart 4: Top Impact Activities by Volume -->
-        <div class="chart-card">
-          <div class="chart-header">
-            <h3 class="chart-title">Top High-Impact Activities by Target Volume</h3>
-          </div>
-          <div class="chart-canvas-wrap">
-            <canvas id="chart-top-activities"></canvas>
-          </div>
-        </div>
-      </div>
-    </main>
+            // ─── Constants ──────────────────────────────────
+            const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+            const QUARTER_MONTHS = {
+                q1: ['jan', 'feb', 'mar'],
+                q2: ['apr', 'may', 'jun'],
+                q3: ['jul', 'aug', 'sep'],
+                q4: ['oct', 'nov', 'dec']
+            };
+            const QUARTER_LABELS = {
+                q1: 'Q1 (Jan–Mar)',
+                q2: 'Q2 (Apr–Jun)',
+                q3: 'Q3 (Jul–Sep)',
+                q4: 'Q4 (Oct–Dec)'
+            };
 
-    <!-- Footer -->
-    <footer
-      style="margin-top: 4rem; padding-top: 1.5rem; border-top: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); flex-wrap: wrap; gap: 1rem;">
-      <div>
-        <strong>Marie Adelaide Leprosy Centre (MALC)</strong> • ZERO Leprosy Project 2025
-      </div>
-      <div>
-        Data Source: <code id="footer-data-source">All 7 Regional Workbooks (National Consolidated)</code>
-      </div>
-    </footer>
+            // ─── Outcome Mapping (returns descriptive names) ──
+            const OUTCOME_NAMES = {
+                1: 'Strengthening Leprosy Case Detection with interruption of transmission through SR PEP.',
+                2: 'Sustained Comprehensive Care Services',
+                3: 'Preparation of Leprosy Control Programme Pakistan for post-elimination phase(phase2) has improved.',
+                4: 'Continue support to TB Control.(Prompt diagnosis and adequate treatment of TB)',
+                5: 'Project Accompanying activities(Regular monitoring and planned activities from health-facility to national levels)'
+            };
 
-  </div>
+            function getOutcome(code, activityName) {
+                const parts = code.split('.');
+                if (parts.length < 2) return activityName;
+                const major = parseInt(parts[0]);
+                if (isNaN(major)) return activityName;
+                return OUTCOME_NAMES[major] || activityName;
+            }
 
-  <!-- Load Data & Application Script -->
-  <script src="data_regions.js"></script>
-  <script src="app.js"></script>
+            // ─── Helper: Check if activity code is sub (has trailing letter) ──
+            function isSubActivity(code) {
+                return /[a-z]$/.test(code);
+            }
+
+            // ─── Key Indicators Helper ─────────────────────
+            const KEY_INDICATORS_SET = new Set(['1.1.1', '1.1.1b', '1.1.2', '1.1.3', '1.1.6', '2.1.1', '3.1.3']);
+
+            function checkIsKeyIndicator(code, originalCode, cellB) {
+                if (KEY_INDICATORS_SET.has(code) || KEY_INDICATORS_SET.has(originalCode)) {
+                    return true;
+                }
+                if (cellB && cellB.s && cellB.s.font) {
+                    var isBold = !!cellB.s.font.bold;
+                    var color = cellB.s.font.color ? (cellB.s.font.color.rgb || cellB.s.font.color.theme || '') : '';
+                    if (isBold && (String(color).toUpperCase().includes('00B050') || String(color).toUpperCase().includes('GREEN'))) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // ─── Regional Configuration & Consolidation ─────
+            const REGION_CONFIG = [
+                { key: 'all', label: 'All Regions (Consolidated)', short: 'All Regions', icon: '🌐' },
+                { key: 'Azad Kashmir', label: 'Azad Kashmir', short: 'AJK', icon: '🏔️' },
+                { key: 'Balochistan', label: 'Balochistan', short: 'Balochistan', icon: '🏜️' },
+                { key: 'Gilgit Baltistan', label: 'Gilgit Baltistan', short: 'GB', icon: '⛰️' },
+                { key: 'Khyber Pakhtunkhwa', label: 'Khyber Pakhtunkhwa', short: 'KP', icon: '🌲' },
+                { key: 'Interior Sindh', label: 'Interior Sindh', short: 'Int. Sindh', icon: '🌾' },
+                { key: 'Karachi', label: 'Karachi', short: 'Karachi', icon: '🏙️' },
+                { key: 'HQ-Training', label: 'HQ-Training', short: 'HQ-TR', icon: '🏥' }
+            ];
+
+            function computeConsolidatedActivities(regionKey) {
+                if (!window.REGIONAL_DATA) return [];
+
+                if (regionKey !== 'all' && regionKey !== 'Sindh (Combined)') {
+                    var list = window.REGIONAL_DATA[regionKey] || [];
+                    return JSON.parse(JSON.stringify(list));
+                }
+
+                var targetRegions = (regionKey === 'Sindh (Combined)')
+                    ? ['Interior Sindh', 'Karachi']
+                    : Object.keys(window.REGIONAL_DATA);
+
+                var baseList = window.REGIONAL_DATA['Azad Kashmir'] || window.REGIONAL_DATA[targetRegions[0]];
+                if (!baseList) return [];
+
+                var consolidated = baseList.map(function (item) {
+                    var monthsCopy = {};
+                    MONTHS.forEach(function (m) {
+                        monthsCopy[m] = { planned: 0, achieved: 0 };
+                    });
+                    return {
+                        id: item.id,
+                        code: item.code,
+                        originalCode: item.originalCode,
+                        name: item.name,
+                        outcome: item.outcome,
+                        isSub: item.isSub,
+                        isKeyIndicator: item.isKeyIndicator,
+                        months: monthsCopy
+                    };
+                });
+
+                var actMap = {};
+                consolidated.forEach(function (a) { actMap[a.code] = a; });
+
+                targetRegions.forEach(function (rName) {
+                    var rActs = window.REGIONAL_DATA[rName] || [];
+                    rActs.forEach(function (a) {
+                        var targetAct = actMap[a.code];
+                        if (targetAct) {
+                            MONTHS.forEach(function (m) {
+                                var mData = a.months[m] || { planned: 0, achieved: 0 };
+                                targetAct.months[m].planned += (mData.planned || 0);
+                                targetAct.months[m].achieved += (mData.achieved || 0);
+                            });
+                        }
+                    });
+                });
+
+                return consolidated;
+            }
+
+            function getRegionMetrics(regionKey) {
+                var acts = computeConsolidatedActivities(regionKey);
+                var totalP = 0, totalA = 0;
+                acts.forEach(function (a) {
+                    MONTHS.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        totalP += (d.planned || 0);
+                        totalA += (d.achieved || 0);
+                    });
+                });
+                var pct = totalP > 0 ? (totalA / totalP) * 100 : 0;
+                return { planned: totalP, achieved: totalA, pct: pct };
+            }
+
+            function getFilteredRegionMetrics(regionKey) {
+                var acts = computeConsolidatedActivities(regionKey);
+                var activeMonths = getActiveMonths();
+
+                if (state.keyIndicatorsOnly) {
+                    acts = acts.filter(function (a) { return a.isKeyIndicator; });
+                }
+
+                if (state.activeOutcome !== 'all') {
+                    acts = acts.filter(function (a) { return a.outcome === state.activeOutcome; });
+                }
+
+                if (state.searchQuery && state.searchQuery.trim() !== '') {
+                    var q = state.searchQuery.toLowerCase().trim();
+                    acts = acts.filter(function (a) {
+                        return a.code.toLowerCase().includes(q) ||
+                            (a.originalCode && a.originalCode.toLowerCase().includes(q)) ||
+                            a.name.toLowerCase().includes(q) ||
+                            a.outcome.toLowerCase().includes(q);
+                    });
+                }
+
+                var totalP = 0, totalA = 0;
+                acts.forEach(function (a) {
+                    activeMonths.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        totalP += (d.planned || 0);
+                        totalA += (d.achieved || 0);
+                    });
+                });
+                var pct = totalP > 0 ? (totalA / totalP) * 100 : 0;
+                return { planned: totalP, achieved: totalA, pct: pct, count: acts.length };
+            }
+
+            function getRegionQuarterlyMetrics(regionKey) {
+                var acts = computeConsolidatedActivities(regionKey);
+
+                if (state.keyIndicatorsOnly) {
+                    acts = acts.filter(function (a) { return a.isKeyIndicator; });
+                }
+
+                if (state.activeOutcome !== 'all') {
+                    acts = acts.filter(function (a) { return a.outcome === state.activeOutcome; });
+                }
+
+                if (state.searchQuery && state.searchQuery.trim() !== '') {
+                    var q = state.searchQuery.toLowerCase().trim();
+                    acts = acts.filter(function (a) {
+                        return a.code.toLowerCase().includes(q) ||
+                            (a.originalCode && a.originalCode.toLowerCase().includes(q)) ||
+                            a.name.toLowerCase().includes(q) ||
+                            a.outcome.toLowerCase().includes(q);
+                    });
+                }
+
+                var quarters = ['q1', 'q2', 'q3', 'q4'];
+                return quarters.map(function (qKey) {
+                    var qMonths = QUARTER_MONTHS[qKey];
+                    var qP = 0, qA = 0;
+                    acts.forEach(function (a) {
+                        qMonths.forEach(function (m) {
+                            var d = a.months[m] || { planned: 0, achieved: 0 };
+                            qP += (d.planned || 0);
+                            qA += (d.achieved || 0);
+                        });
+                    });
+                    var pct = qP > 0 ? (qA / qP) * 100 : 0;
+                    return {
+                        key: qKey,
+                        label: QUARTER_LABELS[qKey],
+                        short: qKey.toUpperCase(),
+                        planned: qP,
+                        achieved: qA,
+                        pct: pct
+                    };
+                });
+            }
+
+            function renderRegionalChips() {
+                if (!dom.regionalChipsGrid) return;
+                var html = '';
+                REGION_CONFIG.forEach(function (r) {
+                    var m = getRegionMetrics(r.key);
+                    var isActive = state.activeRegion === r.key;
+                    var pctBadgeColor = m.pct >= 70 ? '#10b981' : (m.pct >= 51 ? '#f59e0b' : '#ef4444');
+
+                    var pDisplay = m.planned >= 1000000 ? (m.planned / 1000000).toFixed(2) + 'M' : (m.planned >= 1000 ? (m.planned / 1000).toFixed(0) + 'k' : m.planned);
+                    var aDisplay = m.achieved >= 1000000 ? (m.achieved / 1000000).toFixed(2) + 'M' : (m.achieved >= 1000 ? (m.achieved / 1000).toFixed(0) + 'k' : m.achieved);
+
+                    html += `
+                        <div class="regional-chip ${isActive ? 'active' : ''}" data-region="${r.key}" title="${r.label}: ${m.achieved.toLocaleString()} achieved of ${m.planned.toLocaleString()} planned (${m.pct.toFixed(1)}%)">
+                            <div class="regional-chip-top">
+                                <span style="font-size:0.85rem;">${r.icon}</span>
+                                <span class="chip-name">${r.short}</span>
+                                <span class="chip-pct" style="background:${pctBadgeColor}22; color:${pctBadgeColor}; border:1px solid ${pctBadgeColor}50;">${m.pct.toFixed(0)}%</span>
+                            </div>
+                            <div class="regional-chip-sub">
+                                <span style="color:${pctBadgeColor}; font-weight:600;">A: ${aDisplay}</span>
+                                <span class="chip-divider">/</span>
+                                <span>P: ${pDisplay}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                dom.regionalChipsGrid.innerHTML = html;
+            }
+
+            function switchRegion(regionKey) {
+                state.activeRegion = regionKey;
+                if (regionKey !== 'all') {
+                    if (state.chartRegionView === 'comparison') {
+                        state.chartRegionView = 'quarterly';
+                    }
+                } else {
+                    state.chartRegionView = 'comparison';
+                }
+                if (dom.regionSelect) dom.regionSelect.value = regionKey;
+                var cfg = REGION_CONFIG.find(function (c) { return c.key === regionKey; });
+                if (dom.activeRegionPill) {
+                    dom.activeRegionPill.textContent = (cfg ? cfg.icon + ' ' + cfg.label : regionKey);
+                }
+                state.activities = computeConsolidatedActivities(regionKey);
+                populateOutcomeFilter();
+                updateDashboard();
+                renderRegionalChips();
+                toast('Showing ' + (cfg ? cfg.label : regionKey) + ' (' + state.activities.length + ' activities)', 'info');
+            }
+
+            // ─── State ─────────────────────────────────────
+            const state = {
+                activities: [],
+                activeRegion: 'all',
+                chartRegionView: 'comparison',
+                activeOutcome: 'all',
+                activeQuarter: 'all',
+                activeStatus: 'all',
+                keyIndicatorsOnly: false,
+                searchQuery: '',
+                expandedIds: new Set(),
+                expandedCardIds: new Set(),
+                activeView: 'table',
+                dataLoaded: false,
+                theme: 'dark',
+                nextId: 1,
+            };
+
+            // ─── Chart Instances ───────────────────────────
+            let chartOutcome = null;
+            let chartStatus = null;
+            let chartTrend = null;
+            let chartRegion = null;
+
+            // ─── DOM refs ──────────────────────────────────
+            const $ = (s) => document.querySelector(s);
+
+            const dom = {
+                emptyState: $('#empty-state'),
+                dashboard: $('#dashboard'),
+                spinner: $('#spinner'),
+                toastContainer: $('#toast-container'),
+                regionSelect: $('#region-select'),
+                regionalChipsGrid: $('#regional-chips-grid'),
+                activeRegionPill: $('#active-region-pill'),
+                chartRegionTitle: $('#chart-region-title'),
+                chartRegionModeToggles: $('#chart-region-mode-toggles'),
+                btnChartRegCompare: $('#btn-chart-reg-compare'),
+                btnChartRegQuarterly: $('#btn-chart-reg-quarterly'),
+                btnChartRegKey: $('#btn-chart-reg-key'),
+                outcomeSelect: $('#outcome-select'),
+                quarterSelect: $('#quarter-select'),
+                statusSelect: $('#status-select'),
+                searchInput: $('#search-input'),
+                dataSubtitle: $('#data-subtitle'),
+                kpiMainActivities: $('#kpi-main-activities'),
+                kpiSubActivities: $('#kpi-sub-activities'),
+                kpiTotalPlanned: $('#kpi-total-planned'),
+                kpiOverallAchievement: $('#kpi-overall-achievement'),
+                kpiStar: $('#kpi-star'),
+                kpiFullyAchieved: $('#kpi-fully-achieved'),
+                kpiPartialAchieved: $('#kpi-partial-achieved'),
+                kpiNotAchieved: $('#kpi-not-achieved'),
+                kpiZeroTarget: $('#kpi-zero-target'),
+                kpiActiveActivitiesCount: $('#kpi-active-activities-count'),
+                kpiZeroSubCount: $('#kpi-zero-sub-count'),
+                kpiTotalAllCount: $('#kpi-total-all-count'),
+                kpiCardActive: $('#kpi-card-active'),
+                kpiCardFully: $('#kpi-card-fully'),
+                kpiCardPartial: $('#kpi-card-partial'),
+                kpiCardNot: $('#kpi-card-not'),
+                kpiCardZeroTarget: $('#kpi-card-zero-target'),
+                btnLoadFromEmpty: $('#btn-load-from-empty'),
+                btnEditData: $('#btn-edit-data'),
+                btnPdf: $('#btn-pdf'),
+                btnLogout: $('#btn-logout'),
+                btnViewTable: $('#btn-view-table'),
+                btnViewCharts: $('#btn-view-charts'),
+                btnViewCards: $('#btn-view-cards'),
+                btnKeyIndicators: $('#btn-key-indicators'),
+                btnFilterKeyIndicators: $('#btn-filter-key-indicators'),
+                keyIndicatorsCount: $('#key-indicators-count'),
+                chartsSection: $('#charts-section'),
+                tableSection: $('#table-section'),
+                cardsSection: $('#cards-section'),
+                activityKpiGrid: $('#activity-kpi-grid'),
+                cardsVisibleCount: $('#cards-visible-count'),
+                mainFilterToolbar: $('#main-filter-toolbar'),
+                tableTbody: $('#table-tbody'),
+                tableTfoot: $('#table-tfoot'),
+                chartOutcomeCanvas: $('#chart-outcome'),
+                chartStatusCanvas: $('#chart-status'),
+                chartTrendCanvas: $('#chart-trend'),
+                chartRegionCanvas: $('#chart-region'),
+                dataStatusDot: $('#data-status-dot'),
+                dataStatusText: $('#data-status-text'),
+                dataTimestamp: $('#data-timestamp'),
+                themeSwitch: $('#theme-switch'),
+                editModal: $('#edit-modal'),
+                modalTbody: $('#modal-tbody'),
+                modalClose: $('#modal-close'),
+                modalCancel: $('#modal-cancel'),
+                modalSave: $('#modal-save'),
+            };
+
+            // ─── Theme ─────────────────────────────────────
+            function setTheme(theme) {
+                state.theme = theme;
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('zl-theme', theme);
+                if (state.dataLoaded) renderCharts();
+            }
+
+            function toggleTheme() {
+                setTheme(state.theme === 'dark' ? 'light' : 'dark');
+            }
+
+            function initTheme() {
+                const saved = localStorage.getItem('zl-theme');
+                if (saved === 'light' || saved === 'dark') setTheme(saved);
+                else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) setTheme('light');
+                else setTheme('dark');
+            }
+
+            // ─── Toast / Spinner ───────────────────────────
+            function toast(msg, type) {
+                type = type || 'info';
+                const el = document.createElement('div');
+                el.className = 'toast ' + type;
+                el.textContent = msg;
+                dom.toastContainer.appendChild(el);
+                setTimeout(function () { el.remove(); }, 3500);
+            }
+
+            function showSpinner() {
+                dom.spinner.classList.add('visible');
+            }
+
+            function hideSpinner() {
+                dom.spinner.classList.remove('visible');
+            }
+
+            // ─── Data Status ───────────────────────────────
+            function updateDataStatus(loaded, count) {
+                var ts = localStorage.getItem('zl-last-updated') || '';
+                if (ts) {
+                    dom.dataTimestamp.textContent = '🕒 ' + ts;
+                } else {
+                    dom.dataTimestamp.textContent = '';
+                }
+
+                if (loaded && count > 0) {
+                    dom.dataStatusDot.className = 'dot loaded';
+                    var curCfg = REGION_CONFIG.find(function (c) { return c.key === state.activeRegion; });
+                    var label = curCfg ? curCfg.short : 'Data';
+                    dom.dataStatusText.textContent = label + ': ' + count + ' activities';
+                } else if (loaded && count === 0) {
+                    dom.dataStatusDot.className = 'dot empty';
+                    dom.dataStatusText.textContent = 'No data found';
+                } else {
+                    dom.dataStatusDot.className = 'dot empty';
+                    dom.dataStatusText.textContent = 'No data loaded';
+                }
+            }
+
+            // ─── File System Access API & File Handle Support ───
+            async function loadFromFileHandle(handle) {
+                try {
+                    showSpinner();
+                    var perm = 'granted';
+                    if (handle.queryPermission) {
+                        perm = await handle.queryPermission({ mode: 'read' });
+                        if (perm !== 'granted' && handle.requestPermission) {
+                            perm = await handle.requestPermission({ mode: 'read' });
+                        }
+                    }
+                    if (perm === 'granted') {
+                        var file = await handle.getFile();
+                        var arrayBuffer = await file.arrayBuffer();
+                        var data = new Uint8Array(arrayBuffer);
+                        var wb = XLSX.read(data, { type: 'array' });
+                        var success = parseExcelWorkbook(wb);
+                        if (success && state.activities.length) {
+                            state.dataLoaded = true;
+                            dom.emptyState.style.display = 'none';
+                            dom.dashboard.style.display = 'block';
+                            populateOutcomeFilter();
+                            updateDashboard();
+                            var modTime = new Date(file.lastModified).toLocaleString();
+                            localStorage.setItem('zl-last-updated', modTime + ' (Auto-synced from linked disk file)');
+                            updateDataStatus(true, state.activities.length);
+                            saveToLocalStorage();
+                            saveToIndexedDB(state.activities);
+                            toast('Auto-synced latest Excel file from disk!', 'success');
+                            hideSpinner();
+                            return true;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Error loading from saved file handle:', e);
+                }
+                hideSpinner();
+                return false;
+            }
+
+            async function pickAndLinkExcelFile() {
+                if ('showOpenFilePicker' in window) {
+                    try {
+                        var handles = await window.showOpenFilePicker({
+                            types: [{
+                                description: 'Excel Target Sheet',
+                                accept: { 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] }
+                            }],
+                            multiple: false
+                        });
+                        if (handles && handles.length) {
+                            var handle = handles[0];
+                            await saveFileHandleToIndexedDB(handle);
+                            await loadFromFileHandle(handle);
+                            return;
+                        }
+                    } catch (err) {
+                        if (err.name === 'AbortError') return;
+                    }
+                }
+                var input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.xlsx';
+                input.style.display = 'none';
+                input.addEventListener('change', function (e) {
+                    if (e.target.files.length) handleFiles(e.target.files);
+                    input.remove();
+                });
+                document.body.appendChild(input);
+                input.click();
+            }
+
+            function loadExcelData() {
+                pickAndLinkExcelFile();
+            }
+
+            function handleFiles(files) {
+                showSpinner();
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    try {
+                        var data = new Uint8Array(e.target.result);
+                        var wb = XLSX.read(data, { type: 'array' });
+                        var success = parseExcelWorkbook(wb);
+                        if (success && state.activities.length) {
+                            state.dataLoaded = true;
+                            dom.emptyState.style.display = 'none';
+                            dom.dashboard.style.display = 'block';
+                            populateOutcomeFilter();
+                            updateDashboard();
+                            localStorage.setItem('zl-last-updated', new Date().toLocaleString());
+                            updateDataStatus(true, state.activities.length);
+                            saveToLocalStorage();
+                            toast('Loaded ' + state.activities.length + ' activities!', 'success');
+                        } else {
+                            state.dataLoaded = true;
+                            dom.emptyState.style.display = 'none';
+                            dom.dashboard.style.display = 'block';
+                            populateOutcomeFilter();
+                            updateDashboard();
+                            localStorage.setItem('zl-last-updated', new Date().toLocaleString());
+                            updateDataStatus(true, 0);
+                            toast('No data found in file.', 'info');
+                        }
+                    } catch (err) {
+                        toast('Error: ' + err.message, 'error');
+                        console.error(err);
+                    }
+                    hideSpinner();
+                };
+                reader.onerror = function () {
+                    hideSpinner();
+                    toast('File read error', 'error');
+                };
+                reader.readAsArrayBuffer(files[0]);
+            }
+
+            // ─── Drag & Drop ───────────────────────────────
+            function setupDragDrop() {
+                document.addEventListener('dragover', function (e) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                    dom.emptyState.classList.add('drag-over');
+                });
+                document.addEventListener('dragleave', function (e) {
+                    e.preventDefault();
+                    dom.emptyState.classList.remove('drag-over');
+                });
+                document.addEventListener('drop', function (e) {
+                    e.preventDefault();
+                    dom.emptyState.classList.remove('drag-over');
+                    var files = e.dataTransfer.files;
+                    if (files.length && files[0].name.endsWith('.xlsx')) {
+                        handleFiles(files);
+                    } else {
+                        toast('Please drop a valid .xlsx file.', 'error');
+                    }
+                });
+            }
+
+            // ─── Excel Parser ──────────────────────────────
+            function parseExcelWorkbook(wb) {
+                var ws = null;
+                var sheetToUse = null;
+
+                // 1. Find sheet containing 'Jan' headers
+                for (var s = 0; s < wb.SheetNames.length; s++) {
+                    var sName = wb.SheetNames[s];
+                    var tempWs = wb.Sheets[sName];
+                    if (!tempWs) continue;
+                    var tempRows = XLSX.utils.sheet_to_json(tempWs, { header: 1, defval: '' });
+                    for (var r = 0; r < Math.min(30, tempRows.length); r++) {
+                        if (tempRows[r] && tempRows[r].some(function (c) { return String(c).toLowerCase().includes('jan'); })) {
+                            ws = tempWs;
+                            sheetToUse = sName;
+                            break;
+                        }
+                    }
+                    if (ws) break;
+                }
+                if (!ws) {
+                    ws = wb.Sheets[wb.SheetNames[0]];
+                }
+                if (!ws) return false;
+
+                var rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+
+                var headerIdx = -1;
+                for (var i = 0; i < Math.min(30, rows.length); i++) {
+                    if (rows[i] && rows[i].some(function (c) { return String(c).toLowerCase().includes('jan'); })) {
+                        headerIdx = i;
+                        break;
+                    }
+                }
+                if (headerIdx === -1) return false;
+
+                var monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+                var monthCols = {};
+                var headerRow = rows[headerIdx];
+                headerRow.forEach(function (cellVal, colIdx) {
+                    var val = String(cellVal || '').toLowerCase().trim();
+                    monthNames.forEach(function (m) {
+                        if (val === m || (val.startsWith(m) && (val.length === 3 || val[3] === ' ' || val[3] === '\n' || val[3] === '.'))) {
+                            if (monthCols[m] === undefined) {
+                                monthCols[m] = colIdx;
+                            }
+                        }
+                    });
+                });
+
+                var defaultCols = { jan: 3, feb: 4, mar: 5, apr: 7, may: 8, jun: 9, jul: 11, aug: 12, sep: 13, oct: 15, nov: 16, dec: 17 };
+                monthNames.forEach(function (m) {
+                    if (monthCols[m] === undefined) {
+                        monthCols[m] = defaultCols[m];
+                    }
+                });
+
+                var activities = [];
+                var nextId = 1;
+
+                for (var i = headerIdx + 1; i < rows.length; i++) {
+                    var row = rows[i];
+                    if (!row || row.length < 2) continue;
+
+                    var code = String(row[0] || '').trim();
+                    var codeMatch = code.match(/^(\d+\.\d+\.\d+[a-z]?)/);
+                    if (!codeMatch) continue;
+
+                    var plannedRow = null;
+                    var achievedRow = null;
+                    var rowOffset = 0;
+
+                    for (var rOff = 0; rOff <= 2 && (i + rOff) < rows.length; rOff++) {
+                        var checkRow = rows[i + rOff];
+                        if (!checkRow) continue;
+                        var l0 = String(checkRow[0] || '').toLowerCase();
+                        var l1 = String(checkRow[1] || '').toLowerCase();
+                        var l2 = String(checkRow[2] || '').toLowerCase();
+                        if (!plannedRow && (l0.includes('planned') || l1.includes('planned') || l2.includes('planned'))) {
+                            plannedRow = checkRow;
+                        }
+                        if (plannedRow && !achievedRow && (l0.includes('achieved') || l1.includes('achieved') || l2.includes('achieved'))) {
+                            achievedRow = checkRow;
+                            rowOffset = rOff;
+                            break;
+                        }
+                    }
+
+                    if (!plannedRow) plannedRow = row;
+                    if (!achievedRow && (i + 1) < rows.length) achievedRow = rows[i + 1];
+
+                    var name = String(plannedRow[1] || '').trim() || codeMatch[1];
+                    var outcome = getOutcome(codeMatch[1], name);
+
+                    var cellB = ws[XLSX.utils.encode_cell({ r: i, c: 1 })];
+                    var isKey = checkIsKeyIndicator(codeMatch[1], code, cellB);
+
+                    var months = {};
+                    var hasData = false;
+                    monthNames.forEach(function (m) {
+                        var col = monthCols[m];
+                        if (col === undefined) return;
+                        var p = parseFloat(plannedRow[col]) || 0;
+                        var a = achievedRow ? (parseFloat(achievedRow[col]) || 0) : 0;
+                        months[m] = { planned: p, achieved: a };
+                        if (p > 0 || a > 0) hasData = true;
+                    });
+
+                    if (hasData) {
+                        activities.push({
+                            id: nextId++,
+                            code: codeMatch[1],
+                            originalCode: code,
+                            name: name,
+                            outcome: outcome,
+                            months: months,
+                            isSub: isSubActivity(code),
+                            isKeyIndicator: isKey
+                        });
+                    }
+                    if (rowOffset > 0) i += rowOffset;
+                }
+
+                if (activities.length) {
+                    state.activities = activities;
+                    return true;
+                }
+                return false;
+            }
+
+            // ─── Outcome Filter (populates with descriptive names) ──
+            function populateOutcomeFilter() {
+                var select = dom.outcomeSelect;
+                var present = new Set();
+                state.activities.forEach(function (a) { present.add(a.outcome); });
+
+                var mainOutcomes = Object.values(OUTCOME_NAMES);
+
+                var html = '<option value="all">All Outcomes</option>';
+
+                mainOutcomes.forEach(function (o) {
+                    if (present.has(o)) {
+                        html += '<option value="' + o + '">' + o + '</option>';
+                    }
+                });
+
+                var others = [];
+                present.forEach(function (o) {
+                    if (mainOutcomes.indexOf(o) === -1) others.push(o);
+                });
+                others.sort();
+                others.forEach(function (o) {
+                    html += '<option value="' + o + '">' + o + '</option>';
+                });
+
+                select.innerHTML = html;
+                state.activeOutcome = 'all';
+                select.value = 'all';
+            }
+
+            // ─── Auto-Load Default Excel File ───────────────
+            async function fetchDefaultExcelFile() {
+                var filesToTry = [
+                    './Zero Leprosy Target Sheet.xlsx',
+                    './zero_Lep_PowerBiDB.xlsx'
+                ];
+                for (var i = 0; i < filesToTry.length; i++) {
+                    var filename = filesToTry[i];
+                    try {
+                        showSpinner();
+                        var encodedUrl = encodeURI(filename) + '?nocache=' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+                        var response = await fetch(encodedUrl, {
+                            cache: 'no-store',
+                            headers: {
+                                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                                'Pragma': 'no-cache',
+                                'Expires': '0'
+                            }
+                        });
+                        if (!response.ok) {
+                            hideSpinner();
+                            continue;
+                        }
+                        var arrayBuffer = await response.arrayBuffer();
+                        var data = new Uint8Array(arrayBuffer);
+                        var wb = XLSX.read(data, { type: 'array', cellStyles: true });
+                        var success = parseExcelWorkbook(wb);
+                        if (success && state.activities.length) {
+                            state.dataLoaded = true;
+                            dom.emptyState.style.display = 'none';
+                            dom.dashboard.style.display = 'block';
+                            populateOutcomeFilter();
+                            updateDashboard();
+                            var timeStr = new Date().toLocaleTimeString();
+                            var cleanName = filename.replace('./', '');
+                            localStorage.setItem('zl-last-updated', 'Live updated from Excel (' + cleanName + ') at ' + timeStr);
+                            updateDataStatus(true, state.activities.length);
+                            saveToLocalStorage();
+                            toast('Synced latest data from ' + cleanName + ' (' + state.activities.length + ' activities)!', 'success');
+                            hideSpinner();
+                            return true;
+                        }
+                    } catch (err) {
+                        console.log('Default Excel file auto-load skipped for ' + filename + ':', err);
+                    }
+                    hideSpinner();
+                }
+                return false;
+            }
+
+
+
+            // ─── Status Helper ──────────────────────────────
+            function getActivityStatus(activity, months) {
+                var totalP = 0,
+                    totalA = 0;
+                months.forEach(function (m) {
+                    var d = activity.months[m] || { planned: 0, achieved: 0 };
+                    totalP += d.planned;
+                    totalA += d.achieved;
+                });
+                if (totalP === 0 && totalA === 0) return 'zerotarget';
+                if (totalP === 0 && totalA > 0) return 'fully';
+                var pct = (totalA / totalP) * 100;
+                if (pct >= 70) return 'fully';
+                if (pct >= 51) return 'partial';
+                return 'notstarted';
+            }
+
+            // ─── Filtering Logic ────────────────────────────
+            function getFilteredData() {
+                var filtered = state.activities;
+                var activeMonths = getActiveMonths();
+
+                if (state.keyIndicatorsOnly) {
+                    filtered = filtered.filter(function (a) { return a.isKeyIndicator; });
+                }
+
+                if (state.activeOutcome !== 'all') {
+                    filtered = filtered.filter(function (a) { return a.outcome === state.activeOutcome; });
+                }
+
+                if (state.activeStatus !== 'all') {
+                    filtered = filtered.filter(function (a) {
+                        return getActivityStatus(a, activeMonths) === state.activeStatus;
+                    });
+                }
+
+                if (state.searchQuery && state.searchQuery.trim() !== '') {
+                    var q = state.searchQuery.toLowerCase().trim();
+                    filtered = filtered.filter(function (a) {
+                        return a.code.toLowerCase().includes(q) ||
+                            (a.originalCode && a.originalCode.toLowerCase().includes(q)) ||
+                            a.name.toLowerCase().includes(q) ||
+                            a.outcome.toLowerCase().includes(q);
+                    });
+                }
+
+                return filtered;
+            }
+
+            // ─── Quarter Helpers ────────────────────────────
+            function getActiveMonths() {
+                if (state.activeQuarter === 'all') return MONTHS;
+                return QUARTER_MONTHS[state.activeQuarter] || MONTHS;
+            }
+
+            function getQuarterLabel() {
+                if (state.activeQuarter === 'all') return 'Monthly Breakdown (Grand Total)';
+                return QUARTER_LABELS[state.activeQuarter] || 'Monthly Breakdown';
+            }
+
+            // ─── LocalStorage ──────────────────────────────
+            function saveToLocalStorage() {
+                localStorage.setItem('zeroLeprosyData', JSON.stringify(state.activities));
+            }
+
+            function loadFromLocalStorage() {
+                var data = localStorage.getItem('zeroLeprosyData');
+                if (data) {
+                    try {
+                        var parsed = JSON.parse(data);
+                        if (Array.isArray(parsed) && parsed.length) {
+                            state.activities = parsed;
+                            return true;
+                        }
+                    } catch (e) { console.warn('Error parsing saved data'); }
+                }
+                return false;
+            }
+
+            function openDB() {
+                return new Promise(function (resolve, reject) {
+                    var req = indexedDB.open('ZeroLeprosyDB', 2);
+                    req.onupgradeneeded = function (e) {
+                        var db = e.target.result;
+                        if (!db.objectStoreNames.contains('activities')) {
+                            db.createObjectStore('activities', { keyPath: 'id' });
+                        }
+                        if (!db.objectStoreNames.contains('fileHandles')) {
+                            db.createObjectStore('fileHandles', { keyPath: 'key' });
+                        }
+                    };
+                    req.onsuccess = function () { resolve(req.result); };
+                    req.onerror = function () { reject(req.error); };
+                });
+            }
+
+            async function saveFileHandleToIndexedDB(handle) {
+                try {
+                    var db = await openDB();
+                    var tx = db.transaction('fileHandles', 'readwrite');
+                    var store = tx.objectStore('fileHandles');
+                    store.put({ key: 'excelFile', handle: handle });
+                    return true;
+                } catch (e) { console.warn('Save file handle error:', e); return false; }
+            }
+
+            async function getFileHandleFromIndexedDB() {
+                try {
+                    var db = await openDB();
+                    var tx = db.transaction('fileHandles', 'readonly');
+                    var store = tx.objectStore('fileHandles');
+                    var res = await new Promise(function (resolve) {
+                        var req = store.get('excelFile');
+                        req.onsuccess = function () { resolve(req.result ? req.result.handle : null); };
+                        req.onerror = function () { resolve(null); };
+                    });
+                    return res;
+                } catch (e) { return null; }
+            }
+
+            async function saveToIndexedDB(activities) {
+                try {
+                    var db = await openDB();
+                    var tx = db.transaction('activities', 'readwrite');
+                    var store = tx.objectStore('activities');
+                    store.clear();
+                    activities.forEach(function (a) { store.put(a); });
+                    await new Promise(function (res, rej) {
+                        tx.oncomplete = res;
+                        tx.onerror = rej;
+                    });
+                    return true;
+                } catch (e) { console.warn('IndexedDB save error:', e); return false; }
+            }
+
+            async function loadFromIndexedDB() {
+                try {
+                    var db = await openDB();
+                    var tx = db.transaction('activities', 'readonly');
+                    var store = tx.objectStore('activities');
+                    var all = await new Promise(function (res) {
+                        var req = store.getAll();
+                        req.onsuccess = function () { res(req.result); };
+                        req.onerror = function () { res([]); };
+                    });
+                    return all;
+                } catch (e) { console.warn('IndexedDB load error:', e); return []; }
+            }
+
+            // ─── Dashboard Updates ──────────────────────────
+            function updateKeyIndicatorsCount() {
+                var keyCount = state.activities.filter(function (a) { return a.isKeyIndicator; }).length;
+                if (dom.keyIndicatorsCount) {
+                    dom.keyIndicatorsCount.textContent = '(' + keyCount + ')';
+                }
+            }
+
+            function updateDashboard() {
+                updateKeyIndicatorsCount();
+                if (dom.dataSubtitle) {
+                    var regCfg = REGION_CONFIG.find(function (c) { return c.key === state.activeRegion; });
+                    var regPrefix = regCfg ? regCfg.label + ' — ' : '';
+                    if (state.keyIndicatorsOnly) {
+                        var count = getFilteredData().length;
+                        dom.dataSubtitle.textContent = regPrefix + '⭐ Key Indicators Analytics (' + count + ' Key Activities)';
+                    } else {
+                        dom.dataSubtitle.textContent = regPrefix + getQuarterLabel();
+                    }
+                }
+                if (dom.activeRegionPill) {
+                    var curCfg = REGION_CONFIG.find(function (c) { return c.key === state.activeRegion; });
+                    dom.activeRegionPill.textContent = curCfg ? (curCfg.icon + ' ' + curCfg.label) : state.activeRegion;
+                }
+                updateTable();
+                updateKPIs();
+                renderCharts();
+                renderActivityKPICards();
+                syncOutcomePills();
+                renderRegionalChips();
+            }
+
+            function updateKPIs() {
+                var data = getFilteredData();
+                var activeMonths = getActiveMonths();
+
+                var totalActivities = data.length;
+                var subCount = data.filter(function (a) { return a.isSub; }).length;
+
+                var totalP = 0,
+                    totalA = 0,
+                    activeActivitiesCount = 0,
+                    zeroTargetCount = 0,
+                    fully = 0,
+                    partial = 0,
+                    notAchieved = 0;
+
+                data.forEach(function (a) {
+                    var p = 0,
+                        aVal = 0;
+                    activeMonths.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        p += d.planned;
+                        aVal += d.achieved;
+                    });
+                    totalP += p;
+                    totalA += aVal;
+
+                    if (p === 0 && aVal === 0) {
+                        zeroTargetCount++;
+                    } else {
+                        activeActivitiesCount++;
+                        if (p > 0) {
+                            var pct = (aVal / p) * 100;
+                            if (pct >= 70) fully++;
+                            else if (pct >= 51) partial++;
+                            else notAchieved++;
+                        } else {
+                            // Unbudgeted achievement (p === 0, aVal > 0)
+                            fully++;
+                        }
+                    }
+                });
+
+                // Show total activities (87) on Card 1, with active and zero counts in subtext
+                dom.kpiMainActivities.textContent = totalActivities;
+                if (dom.kpiActiveActivitiesCount) dom.kpiActiveActivitiesCount.textContent = activeActivitiesCount;
+                if (dom.kpiZeroSubCount) dom.kpiZeroSubCount.textContent = zeroTargetCount;
+                if (dom.kpiTotalAllCount) dom.kpiTotalAllCount.textContent = totalActivities;
+                dom.kpiSubActivities.textContent = subCount;
+                dom.kpiTotalPlanned.textContent = totalP.toLocaleString();
+
+                var overall = totalP > 0 ? ((totalA / totalP) * 100) : 0;
+                dom.kpiOverallAchievement.textContent = overall.toFixed(1) + '%';
+                dom.kpiFullyAchieved.textContent = fully;
+                dom.kpiPartialAchieved.textContent = partial;
+                dom.kpiNotAchieved.textContent = notAchieved;
+                if (dom.kpiZeroTarget) dom.kpiZeroTarget.textContent = zeroTargetCount;
+
+                if (overall > 100) {
+                    dom.kpiStar.textContent = ' 🌟';
+                    dom.kpiOverallAchievement.className = 'kpi-value over-achieved';
+                } else {
+                    dom.kpiStar.textContent = '';
+                    dom.kpiOverallAchievement.className = 'kpi-value achieved';
+                }
+            }
+
+            function updateTable() {
+                var data = getFilteredData();
+                var activeMonths = getActiveMonths();
+                var tbody = dom.tableTbody;
+                var tfoot = dom.tableTfoot;
+
+                if (!data.length) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="8" style="text-align:center;padding:20px;color:var(--text-muted);">No data matching the selected filters</td></tr>';
+                    if (tfoot) tfoot.innerHTML = '';
+                    return;
+                }
+
+                var html = '';
+                var totalSumP = 0, totalSumA = 0;
+
+                data.forEach(function (a) {
+                    var totalP = 0, totalA = 0;
+                    activeMonths.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        totalP += d.planned;
+                        totalA += d.achieved;
+                    });
+                    totalSumP += totalP;
+                    totalSumA += totalA;
+
+                    var pct = totalP > 0 ? (totalA / totalP) * 100 : 0;
+                    var status, statusClass, barColor;
+                    if (totalP === 0 && totalA === 0) {
+                        status = '⚪ Zero Target & Achieved';
+                        statusClass = 'zerotarget';
+                        barColor = '#94a3b8';
+                    } else if (pct >= 70 || (totalP === 0 && totalA > 0)) {
+                        status = '✅ Fully Achieved';
+                        statusClass = 'fully';
+                        barColor = '#10b981';
+                    } else if (pct >= 51) {
+                        status = '⏳ Partially Achieved';
+                        statusClass = 'partial';
+                        barColor = '#f59e0b';
+                    } else {
+                        status = '❌ Not Achieved';
+                        statusClass = 'notstarted';
+                        barColor = '#ef4444';
+                    }
+                    var displayPct = Math.min(pct, 100);
+                    var isExpanded = state.expandedIds.has(a.id);
+                    var chevron = isExpanded ? '▼' : '▶';
+
+                    var rowClass = a.isKeyIndicator ? 'row-clickable key-indicator-row' : 'row-clickable';
+                    var keyBadge = a.isKeyIndicator ? '<span class="key-badge">⭐ Key Indicator</span>' : '';
+                    var nameStyle = a.isKeyIndicator ? 'font-weight:700; color:#10b981;' : '';
+
+                    html += `
+                        <tr class="${rowClass}" data-toggle-id="${a.id}">
+                            <td style="text-align:center;"><button class="expand-btn" data-toggle-id="${a.id}">${chevron}</button></td>
+                            <td><strong>${a.code}</strong> ${keyBadge}</td>
+                            <td class="activity-label" style="${nameStyle}">${a.name}</td>
+                            <td style="text-align:left; font-size:0.7rem; color:var(--text-secondary);">${a.outcome}</td>
+                            <td>${totalP.toLocaleString()}</td>
+                            <td>${totalA.toLocaleString()}</td>
+                            <td>
+                                <div class="progress-bar"><div class="fill" style="width:${displayPct}%;background:${barColor};"></div></div>
+                                ${pct.toFixed(1)}%
+                            </td>
+                            <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        </tr>
+                    `;
+
+                    if (isExpanded) {
+                        var monthHeaders = MONTHS.map(function (m) { return `<th>${m.toUpperCase()}</th>`; }).join('');
+                        var monthP = MONTHS.map(function (m) { return `<td>P: ${(a.months[m] ? a.months[m].planned : 0).toLocaleString()}</td>`; }).join('');
+                        var monthA = MONTHS.map(function (m) { return `<td>A: ${(a.months[m] ? a.months[m].achieved : 0).toLocaleString()}</td>`; }).join('');
+                        html += `
+                            <tr class="detail-row">
+                                <td colspan="8" style="padding:10px 16px;">
+                                    <div style="font-size:0.75rem; font-weight:600; margin-bottom:4px; color:var(--accent-1);">📅 12-Month Breakdown for ${a.code} - ${a.name}:</div>
+                                    <table class="mini-month-table">
+                                        <thead><tr>${monthHeaders}</tr></thead>
+                                        <tbody>
+                                            <tr>${monthP}</tr>
+                                            <tr>${monthA}</tr>
+                                        </tbody>
+                                    </table>
+                                </td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                tbody.innerHTML = html;
+
+                var overallPct = totalSumP > 0 ? (totalSumA / totalSumP) * 100 : 0;
+                var overallStatus = overallPct >= 70 ? '✅ Fully Achieved' : overallPct >= 51 ? '⏳ Partially Achieved' : '❌ Not Achieved';
+                var overallClass = overallPct >= 70 ? 'fully' : overallPct >= 51 ? 'partial' : 'notstarted';
+
+                if (tfoot) {
+                    tfoot.innerHTML = `
+                        <tr>
+                            <td colspan="4" style="text-align:right; font-weight:700; padding:10px;">TOTAL SUMMARY (${data.length} activities):</td>
+                            <td style="font-weight:700;">${totalSumP.toLocaleString()}</td>
+                            <td style="font-weight:700;">${totalSumA.toLocaleString()}</td>
+                            <td style="font-weight:700; color:${overallPct >= 70 ? '#10b981' : overallPct >= 51 ? '#f59e0b' : '#ef4444'};">${overallPct.toFixed(1)}%</td>
+                            <td><span class="status-badge ${overallClass}">${overallStatus}</span></td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // ─── Chart Rendering ────────────────────────────
+            function renderCharts() {
+                if (typeof Chart === 'undefined') return;
+                var data = getFilteredData();
+                var activeMonths = getActiveMonths();
+                var isDark = state.theme === 'dark';
+                var textColor = isDark ? '#cbd5e1' : '#334155';
+                var gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+
+                // Chart 1: Outcome Target vs Achievement
+                var outcomesMap = {};
+                data.forEach(function (a) {
+                    var outKey = a.outcome.length > 30 ? a.outcome.substring(0, 30) + '...' : a.outcome;
+                    if (!outcomesMap[outKey]) outcomesMap[outKey] = { planned: 0, achieved: 0 };
+                    activeMonths.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        outcomesMap[outKey].planned += d.planned;
+                        outcomesMap[outKey].achieved += d.achieved;
+                    });
+                });
+
+                var outcomeLabels = Object.keys(outcomesMap);
+                var outcomePlanned = outcomeLabels.map(function (k) { return outcomesMap[k].planned; });
+                var outcomeAchieved = outcomeLabels.map(function (k) { return outcomesMap[k].achieved; });
+
+                if (chartOutcome) chartOutcome.destroy();
+                if (dom.chartOutcomeCanvas) {
+                    chartOutcome = new Chart(dom.chartOutcomeCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: outcomeLabels,
+                            datasets: [
+                                { label: 'Planned', data: outcomePlanned, backgroundColor: 'rgba(6, 182, 212, 0.75)', borderColor: '#06b6d4', borderWidth: 1, borderRadius: 4 },
+                                { label: 'Achieved', data: outcomeAchieved, backgroundColor: 'rgba(16, 185, 129, 0.75)', borderColor: '#10b981', borderWidth: 1, borderRadius: 4 }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: textColor, font: { size: 10 } } },
+                                tooltip: { mode: 'index', intersect: false }
+                            },
+                            scales: {
+                                x: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor } },
+                                y: { ticks: { color: textColor, font: { size: 9 } }, grid: { color: gridColor } }
+                            }
+                        }
+                    });
+                }
+
+                // Chart 2: Status Breakdown Doughnut
+                var fully = 0, partial = 0, notAchieved = 0, zeroTarget = 0;
+                data.forEach(function (a) {
+                    var st = getActivityStatus(a, activeMonths);
+                    if (st === 'fully') fully++;
+                    else if (st === 'partial') partial++;
+                    else if (st === 'zerotarget') zeroTarget++;
+                    else notAchieved++;
+                });
+
+                if (chartStatus) chartStatus.destroy();
+                if (dom.chartStatusCanvas) {
+                    var statusLabels = ['Fully Achieved (≥70%)', 'Partially Achieved (51-69%)', 'Not Achieved (≤50%)'];
+                    var statusData = [fully, partial, notAchieved];
+                    var statusColors = ['#10b981', '#f59e0b', '#ef4444'];
+                    if (zeroTarget > 0) {
+                        statusLabels.push('Zero Target & Achieved');
+                        statusData.push(zeroTarget);
+                        statusColors.push('#94a3b8');
+                    }
+                    chartStatus = new Chart(dom.chartStatusCanvas, {
+                        type: 'doughnut',
+                        data: {
+                            labels: statusLabels,
+                            datasets: [{
+                                data: statusData,
+                                backgroundColor: statusColors,
+                                borderWidth: 2,
+                                borderColor: isDark ? '#111827' : '#ffffff'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'right', labels: { color: textColor, font: { size: 10 } } }
+                            },
+                            cutout: '65%'
+                        }
+                    });
+                }
+
+                // Chart 3: Monthly Trend Line Chart (Jan-Dec)
+                var monthP = {}, monthA = {};
+                MONTHS.forEach(function (m) { monthP[m] = 0; monthA[m] = 0; });
+                data.forEach(function (a) {
+                    MONTHS.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        monthP[m] += d.planned;
+                        monthA[m] += d.achieved;
+                    });
+                });
+
+                var trendLabels = MONTHS.map(function (m) { return m.toUpperCase(); });
+                var trendPlanned = MONTHS.map(function (m) { return monthP[m]; });
+                var trendAchieved = MONTHS.map(function (m) { return monthA[m]; });
+
+                if (chartTrend) chartTrend.destroy();
+                if (dom.chartTrendCanvas) {
+                    chartTrend = new Chart(dom.chartTrendCanvas, {
+                        type: 'line',
+                        data: {
+                            labels: trendLabels,
+                            datasets: [
+                                { label: 'Planned', data: trendPlanned, borderColor: '#06b6d4', backgroundColor: 'rgba(6, 182, 212, 0.1)', fill: true, tension: 0.3, pointRadius: 3 },
+                                { label: 'Achieved', data: trendAchieved, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.15)', fill: true, tension: 0.3, pointRadius: 4 }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: textColor, font: { size: 10 } } },
+                                tooltip: { mode: 'index', intersect: false }
+                            },
+                            scales: {
+                                x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
+                                y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                            }
+                        }
+                    });
+                }
+
+                // Chart 4: Target vs Achievement by Region / Selected Region Focus
+                if (dom.chartRegionCanvas && window.REGIONAL_DATA) {
+                    var isSelectedRegion = state.activeRegion !== 'all';
+                    var selectedCfg = REGION_CONFIG.find(function (c) { return c.key === state.activeRegion; });
+
+                    // Show or hide mode toggles
+                    if (dom.chartRegionModeToggles) {
+                        dom.chartRegionModeToggles.style.display = isSelectedRegion ? 'flex' : 'none';
+                    }
+                    if (dom.btnChartRegCompare) {
+                        dom.btnChartRegCompare.classList.toggle('active', state.chartRegionView === 'comparison');
+                    }
+                    if (dom.btnChartRegQuarterly) {
+                        dom.btnChartRegQuarterly.classList.toggle('active', state.chartRegionView === 'quarterly');
+                    }
+                    if (dom.btnChartRegKey) {
+                        dom.btnChartRegKey.classList.toggle('active', state.chartRegionView === 'key_indicators');
+                    }
+
+                    if (chartRegion) chartRegion.destroy();
+
+                    if (isSelectedRegion && state.chartRegionView === 'quarterly') {
+                        // ─── Mode 1: Selected Region Quarterly Progression (Q1-Q4) ───
+                        var regName = selectedCfg ? selectedCfg.label : state.activeRegion;
+                        if (dom.chartRegionTitle) {
+                            dom.chartRegionTitle.textContent = '📍 ' + regName + ' — Quarterly Target vs Achievement (Q1 – Q4)';
+                        }
+
+                        var qData = getRegionQuarterlyMetrics(state.activeRegion);
+                        var qLabels = qData.map(function (qd) {
+                            var isActQ = (state.activeQuarter === qd.key);
+                            return (isActQ ? '⭐ ' : '') + qd.short + ' (' + qd.pct.toFixed(0) + '%)';
+                        });
+                        var qPlanned = qData.map(function (qd) { return qd.planned; });
+                        var qAchieved = qData.map(function (qd) { return qd.achieved; });
+
+                        var qPlannedBg = qData.map(function (qd) {
+                            if (state.activeQuarter !== 'all') {
+                                return state.activeQuarter === qd.key ? 'rgba(6, 182, 212, 0.95)' : 'rgba(6, 182, 212, 0.22)';
+                            }
+                            return 'rgba(6, 182, 212, 0.85)';
+                        });
+                        var qPlannedBorder = qData.map(function (qd) {
+                            if (state.activeQuarter !== 'all') {
+                                return state.activeQuarter === qd.key ? '#22d3ee' : 'rgba(6, 182, 212, 0.35)';
+                            }
+                            return '#06b6d4';
+                        });
+                        var qAchievedBg = qData.map(function (qd) {
+                            if (state.activeQuarter !== 'all') {
+                                return state.activeQuarter === qd.key ? 'rgba(16, 185, 129, 0.95)' : 'rgba(16, 185, 129, 0.22)';
+                            }
+                            return 'rgba(16, 185, 129, 0.85)';
+                        });
+                        var qAchievedBorder = qData.map(function (qd) {
+                            if (state.activeQuarter !== 'all') {
+                                return state.activeQuarter === qd.key ? '#34d399' : 'rgba(16, 185, 129, 0.35)';
+                            }
+                            return '#10b981';
+                        });
+                        var qBorderThickness = qData.map(function (qd) {
+                            return (state.activeQuarter === qd.key) ? 2.5 : 1.5;
+                        });
+
+                        chartRegion = new Chart(dom.chartRegionCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: qLabels,
+                                datasets: [
+                                    {
+                                        label: 'Planned Target',
+                                        data: qPlanned,
+                                        backgroundColor: qPlannedBg,
+                                        borderColor: qPlannedBorder,
+                                        borderWidth: qBorderThickness,
+                                        borderRadius: 4
+                                    },
+                                    {
+                                        label: 'Actual Achieved',
+                                        data: qAchieved,
+                                        backgroundColor: qAchievedBg,
+                                        borderColor: qAchievedBorder,
+                                        borderWidth: qBorderThickness,
+                                        borderRadius: 4
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { labels: { color: textColor, font: { size: 10 } } },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false,
+                                        callbacks: {
+                                            afterBody: function (items) {
+                                                var idx = items[0].dataIndex;
+                                                var p = qPlanned[idx];
+                                                var a = qAchieved[idx];
+                                                var pct = p > 0 ? ((a / p) * 100).toFixed(1) + '%' : '0%';
+                                                var qd = qData[idx];
+                                                var activeNotice = (state.activeQuarter === qd.key) ? '⭐ Active Filter\n' : '';
+                                                return activeNotice + 'Achievement: ' + pct + '\n(Click bar to toggle quarter filter)';
+                                            }
+                                        }
+                                    }
+                                },
+                                onClick: function (e, elements) {
+                                    if (elements && elements.length > 0) {
+                                        var idx = elements[0].index;
+                                        var clickedQ = qData[idx].key;
+                                        if (clickedQ && dom.quarterSelect) {
+                                            dom.quarterSelect.value = (state.activeQuarter === clickedQ ? 'all' : clickedQ);
+                                            dom.quarterSelect.dispatchEvent(new Event('change'));
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
+                                    y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                                }
+                            }
+                        });
+
+                    } else if (isSelectedRegion && state.chartRegionView === 'key_indicators') {
+                        // ─── Mode 2: Selected Region Key Indicators Target vs Achievement ───
+                        var regName = selectedCfg ? selectedCfg.label : state.activeRegion;
+                        if (dom.chartRegionTitle) {
+                            dom.chartRegionTitle.textContent = '📍 ' + regName + ' — Key Indicators Target vs Achievement';
+                        }
+
+                        var filteredActs = getFilteredData().filter(function (a) { return a.isKeyIndicator; });
+                        if (!filteredActs.length) {
+                            filteredActs = state.activities.filter(function (a) { return a.isKeyIndicator; });
+                        }
+
+                        var activeMonths = getActiveMonths();
+                        var kiLabels = filteredActs.map(function (a) { return a.code; });
+                        var kiPlanned = filteredActs.map(function (a) {
+                            return activeMonths.reduce(function (sum, m) { return sum + ((a.months[m] && a.months[m].planned) || 0); }, 0);
+                        });
+                        var kiAchieved = filteredActs.map(function (a) {
+                            return activeMonths.reduce(function (sum, m) { return sum + ((a.months[m] && a.months[m].achieved) || 0); }, 0);
+                        });
+
+                        chartRegion = new Chart(dom.chartRegionCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: kiLabels,
+                                datasets: [
+                                    {
+                                        label: 'Planned Target',
+                                        data: kiPlanned,
+                                        backgroundColor: 'rgba(6, 182, 212, 0.85)',
+                                        borderColor: '#06b6d4',
+                                        borderWidth: 1.5,
+                                        borderRadius: 4
+                                    },
+                                    {
+                                        label: 'Actual Achieved',
+                                        data: kiAchieved,
+                                        backgroundColor: 'rgba(16, 185, 129, 0.85)',
+                                        borderColor: '#10b981',
+                                        borderWidth: 1.5,
+                                        borderRadius: 4
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { labels: { color: textColor, font: { size: 10 } } },
+                                    tooltip: {
+                                        callbacks: {
+                                            title: function (items) {
+                                                var idx = items[0].dataIndex;
+                                                var act = filteredActs[idx];
+                                                return act.code + ': ' + (act.name.length > 55 ? act.name.substring(0, 55) + '...' : act.name);
+                                            },
+                                            afterBody: function (items) {
+                                                var idx = items[0].dataIndex;
+                                                var p = kiPlanned[idx];
+                                                var a = kiAchieved[idx];
+                                                var pct = p > 0 ? ((a / p) * 100).toFixed(1) + '%' : '0%';
+                                                return 'Achievement Rate: ' + pct;
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: { ticks: { color: textColor, font: { size: 9 }, maxRotation: 45 }, grid: { color: gridColor } },
+                                    y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                                }
+                            }
+                        });
+
+                    } else {
+                        // ─── Mode 3: Regional Comparison (With Selection Spotlight Highlight) ───
+                        var regComparisonKeys = ['Azad Kashmir', 'Balochistan', 'Gilgit Baltistan', 'Khyber Pakhtunkhwa', 'Interior Sindh', 'Karachi', 'HQ-Training'];
+
+                        if (dom.chartRegionTitle) {
+                            if (isSelectedRegion) {
+                                var rName = selectedCfg ? selectedCfg.label : state.activeRegion;
+                                dom.chartRegionTitle.textContent = '📍 Regional Comparison — ' + rName + ' Highlighted (vs Other Regions)';
+                            } else {
+                                dom.chartRegionTitle.textContent = '📍 Regional Comparison — Target vs Achievement across Provinces / Regions';
+                            }
+                        }
+
+                        var regLabels = [];
+                        var regPlanned = [];
+                        var regAchieved = [];
+                        var plannedBg = [];
+                        var plannedBorder = [];
+                        var achievedBg = [];
+                        var achievedBorder = [];
+                        var borderThickness = [];
+
+                        regComparisonKeys.forEach(function (k) {
+                            var cfg = REGION_CONFIG.find(function (c) { return c.key === k; });
+                            var isThisActive = isSelectedRegion && (
+                                state.activeRegion === k ||
+                                (state.activeRegion === 'Sindh (Combined)' && (k === 'Interior Sindh' || k === 'Karachi'))
+                            );
+
+                            var labelPrefix = isThisActive ? '⭐ ' : '';
+                            var labelText = labelPrefix + (cfg ? (cfg.icon + ' ' + cfg.short) : k);
+                            regLabels.push(labelText);
+
+                            var m = getFilteredRegionMetrics(k);
+                            regPlanned.push(m.planned);
+                            regAchieved.push(m.achieved);
+
+                            if (isSelectedRegion) {
+                                if (isThisActive) {
+                                    // Highlighted Selected Region
+                                    plannedBg.push('rgba(6, 182, 212, 0.95)');
+                                    plannedBorder.push('#22d3ee');
+                                    achievedBg.push('rgba(16, 185, 129, 0.95)');
+                                    achievedBorder.push('#34d399');
+                                    borderThickness.push(2.5);
+                                } else {
+                                    // Dimmed Non-Selected Regions
+                                    plannedBg.push(isDark ? 'rgba(6, 182, 212, 0.16)' : 'rgba(6, 182, 212, 0.2)');
+                                    plannedBorder.push(isDark ? 'rgba(6, 182, 212, 0.3)' : 'rgba(6, 182, 212, 0.35)');
+                                    achievedBg.push(isDark ? 'rgba(16, 185, 129, 0.16)' : 'rgba(16, 185, 129, 0.2)');
+                                    achievedBorder.push(isDark ? 'rgba(16, 185, 129, 0.3)' : 'rgba(16, 185, 129, 0.35)');
+                                    borderThickness.push(1);
+                                }
+                            } else {
+                                // Default All Regions
+                                plannedBg.push('rgba(6, 182, 212, 0.75)');
+                                plannedBorder.push('#06b6d4');
+                                achievedBg.push('rgba(16, 185, 129, 0.75)');
+                                achievedBorder.push('#10b981');
+                                borderThickness.push(1);
+                            }
+                        });
+
+                        chartRegion = new Chart(dom.chartRegionCanvas, {
+                            type: 'bar',
+                            data: {
+                                labels: regLabels,
+                                datasets: [
+                                    {
+                                        label: 'Planned Target',
+                                        data: regPlanned,
+                                        backgroundColor: plannedBg,
+                                        borderColor: plannedBorder,
+                                        borderWidth: borderThickness,
+                                        borderRadius: 4
+                                    },
+                                    {
+                                        label: 'Actual Achieved',
+                                        data: regAchieved,
+                                        backgroundColor: achievedBg,
+                                        borderColor: achievedBorder,
+                                        borderWidth: borderThickness,
+                                        borderRadius: 4
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: { labels: { color: textColor, font: { size: 10 } } },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false,
+                                        callbacks: {
+                                            afterBody: function (items) {
+                                                var idx = items[0].dataIndex;
+                                                var p = regPlanned[idx];
+                                                var a = regAchieved[idx];
+                                                var pct = p > 0 ? ((a / p) * 100).toFixed(1) + '%' : '0%';
+                                                var key = regComparisonKeys[idx];
+                                                var isSel = (key === state.activeRegion);
+                                                return (isSel ? '⭐ SELECTED REGION\n' : '') + 'Achievement Rate: ' + pct + '\n(Click bar to switch to this region)';
+                                            }
+                                        }
+                                    }
+                                },
+                                onClick: function (e, elements) {
+                                    if (elements && elements.length > 0) {
+                                        var idx = elements[0].index;
+                                        var clickedKey = regComparisonKeys[idx];
+                                        if (clickedKey) {
+                                            switchRegion(clickedKey);
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
+                                    y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+
+            // ─── Activity KPI Cards Rendering ───────────────
+            function renderActivityKPICards() {
+                if (!dom.activityKpiGrid) return;
+                var data = getFilteredData();
+                var activeMonths = getActiveMonths();
+                var isQuarterFiltered = state.activeQuarter !== 'all';
+                var periodLabel = isQuarterFiltered ? getQuarterLabel() : 'Annual Target (Jan–Dec)';
+
+                if (dom.cardsVisibleCount) {
+                    dom.cardsVisibleCount.textContent = data.length;
+                }
+
+                if (!data.length) {
+                    dom.activityKpiGrid.innerHTML = `
+                        <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; background: var(--bg-card); border-radius: var(--radius-md); border: 1px dashed var(--border-color); color: var(--text-muted);">
+                            <div style="font-size: 2.5rem; margin-bottom: 8px;">🔍</div>
+                            <h4 style="font-size: 1rem; color: var(--text-primary); margin-bottom: 4px;">No Activities Match Your Filter</h4>
+                            <p style="font-size: 0.8rem;">Try clearing search keywords or selecting "All Outcomes" / "All Statuses".</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                var html = '';
+
+                data.forEach(function (a) {
+                    var totalP = 0, totalA = 0;
+                    activeMonths.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        totalP += d.planned;
+                        totalA += d.achieved;
+                    });
+
+                    var pct = totalP > 0 ? (totalA / totalP) * 100 : 0;
+                    var statusLabel, statusClass, barColor;
+                    if (totalP === 0 && totalA === 0) {
+                        statusLabel = '⚪ Zero Target & Achieved';
+                        statusClass = 'zerotarget';
+                        barColor = '#94a3b8';
+                    } else if (pct >= 70 || (totalP === 0 && totalA > 0)) {
+                        statusLabel = '✅ Fully Achieved';
+                        statusClass = 'fully';
+                        barColor = '#10b981';
+                    } else if (pct >= 51) {
+                        statusLabel = '⏳ Partially Achieved';
+                        statusClass = 'partial';
+                        barColor = '#f59e0b';
+                    } else {
+                        statusLabel = '❌ Not Achieved';
+                        statusClass = 'notstarted';
+                        barColor = '#ef4444';
+                    }
+
+                    var displayPct = Math.min(pct, 100);
+
+                    // Quarterly metrics
+                    var qMetrics = ['q1', 'q2', 'q3', 'q4'].map(function (qKey) {
+                        var qP = 0, qA = 0;
+                        QUARTER_MONTHS[qKey].forEach(function (m) {
+                            var d = a.months[m] || { planned: 0, achieved: 0 };
+                            qP += d.planned;
+                            qA += d.achieved;
+                        });
+                        var qPct = qP > 0 ? (qA / qP) * 100 : 0;
+                        var qColor = qPct >= 70 ? '#10b981' : (qPct >= 51 ? '#f59e0b' : (qP === 0 ? 'var(--text-muted)' : '#ef4444'));
+                        return {
+                            label: qKey.toUpperCase(),
+                            p: qP,
+                            a: qA,
+                            pct: qPct,
+                            color: qColor,
+                            displayPct: Math.min(qPct, 100)
+                        };
+                    });
+
+                    var isCardExpanded = state.expandedCardIds.has(a.id);
+                    var keyIndicatorBadge = a.isKeyIndicator ? '<span class="key-badge">⭐ Key Indicator</span>' : '';
+                    var cardClass = a.isKeyIndicator ? 'activity-kpi-card key-indicator-card' : 'activity-kpi-card';
+
+                    // Outcome short label (e.g. Outcome 1, Outcome 2)
+                    var outcomeNumMatch = a.code.match(/^(\d+)/);
+                    var outcomeTag = outcomeNumMatch ? ('Outcome ' + outcomeNumMatch[1]) : 'Outcome';
+
+                    var monthHeaders = MONTHS.map(function (m) { return '<th>' + m.toUpperCase() + '</th>'; }).join('');
+                    var monthP = MONTHS.map(function (m) { return '<td>P: ' + (a.months[m] ? a.months[m].planned : 0).toLocaleString() + '</td>'; }).join('');
+                    var monthA = MONTHS.map(function (m) { return '<td>A: ' + (a.months[m] ? a.months[m].achieved : 0).toLocaleString() + '</td>'; }).join('');
+
+                    html += `
+                        <div class="${cardClass}" id="activity-card-${a.id}">
+                            <div>
+                                <div class="activity-card-top">
+                                    <div class="activity-card-code-wrap">
+                                        <span class="activity-card-code">${a.code}</span>
+                                        ${keyIndicatorBadge}
+                                    </div>
+                                    <span class="activity-card-outcome-tag" title="${a.outcome}">${outcomeTag}</span>
+                                </div>
+
+                                <h4 class="activity-card-title">${a.name}</h4>
+
+                                <div class="activity-card-metric-box">
+                                    <div class="activity-card-metric-header">
+                                        <div>
+                                            <span style="font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); font-weight: 600; display: block;">${periodLabel}</span>
+                                            <span class="activity-card-pct ${statusClass}">${pct.toFixed(1)}%</span>
+                                        </div>
+                                        <span class="status-badge ${statusClass}">${statusLabel}</span>
+                                    </div>
+
+                                    <div class="progress-bar" style="width: 100%; height: 7px; margin-top: 4px; margin-bottom: 6px;">
+                                        <div class="fill" style="width: ${displayPct}%; background: ${barColor};"></div>
+                                    </div>
+
+                                    <div class="activity-card-targets">
+                                        <span>Target: <strong style="color:var(--text-primary);">${totalP.toLocaleString()}</strong></span>
+                                        <span>Achieved: <strong style="color:${barColor};">${totalA.toLocaleString()}</strong></span>
+                                        <span>Gap: <strong style="color:var(--text-muted);">${Math.max(0, totalP - totalA).toLocaleString()}</strong></span>
+                                    </div>
+                                </div>
+
+                                <div class="activity-quarter-grid">
+                                    ${qMetrics.map(function (qm) {
+                        return `
+                                            <div class="quarter-mini-box">
+                                                <div class="quarter-mini-label">${qm.label}</div>
+                                                <div class="quarter-mini-val">${qm.a.toLocaleString()}<span style="font-size:0.55rem; color:var(--text-muted);">/${qm.p.toLocaleString()}</span></div>
+                                                <div class="quarter-mini-pct" style="color:${qm.color};">${qm.p > 0 ? qm.pct.toFixed(0) + '%' : '—'}</div>
+                                                <div class="quarter-mini-bar">
+                                                    <div class="fill" style="width:${qm.displayPct}%; background:${qm.color};"></div>
+                                                </div>
+                                            </div>
+                                        `;
+                    }).join('')}
+                                </div>
+                            </div>
+
+                            <div>
+                                <button class="card-expand-btn" data-card-toggle-id="${a.id}">
+                                    <span>${isCardExpanded ? '▲ Hide 12-Month Table' : '▼ View 12-Month Breakdown'}</span>
+                                </button>
+
+                                <div class="card-month-details ${isCardExpanded ? 'visible' : ''}" id="card-month-details-${a.id}">
+                                    <table class="mini-month-table">
+                                        <thead><tr>${monthHeaders}</tr></thead>
+                                        <tbody>
+                                            <tr>${monthP}</tr>
+                                            <tr>${monthA}</tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                dom.activityKpiGrid.innerHTML = html;
+            }
+
+            // ─── Outcome Quick Pills Logic ───────────────────
+            function syncOutcomePills() {
+                var container = document.getElementById('outcome-pills');
+                if (!container) return;
+                container.querySelectorAll('.pill-btn').forEach(function (btn) {
+                    var oVal = btn.dataset.outcome;
+                    if (state.activeOutcome === 'all' && oVal === 'all') {
+                        btn.classList.add('active');
+                    } else if (oVal !== 'all' && OUTCOME_NAMES[parseInt(oVal)] === state.activeOutcome) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+            }
+
+            function setupOutcomePills() {
+                var container = document.getElementById('outcome-pills');
+                if (!container) return;
+                container.addEventListener('click', function (e) {
+                    var btn = e.target.closest('.pill-btn');
+                    if (!btn) return;
+                    var outcomeVal = btn.dataset.outcome;
+                    if (outcomeVal === 'all') {
+                        dom.outcomeSelect.value = 'all';
+                        state.activeOutcome = 'all';
+                    } else {
+                        var fullOutcome = OUTCOME_NAMES[parseInt(outcomeVal)];
+                        if (fullOutcome) {
+                            dom.outcomeSelect.value = fullOutcome;
+                            state.activeOutcome = fullOutcome;
+                        }
+                    }
+                    syncOutcomePills();
+                    updateDashboard();
+                });
+            }
+
+            // ─── Edit Modal ──────────────────────────────────
+            function openEditModal() {
+                if (!state.activities.length) { toast('No data to edit.', 'error'); return; }
+                var tbody = dom.modalTbody;
+                tbody.innerHTML = '';
+                state.activities.forEach(function (a) {
+                    var keyTag = a.isKeyIndicator ? ' <span style="color:#10b981; font-weight:700;">⭐</span>' : '';
+                    var nameStyle = a.isKeyIndicator ? 'font-weight:700; color:#10b981;' : '';
+                    var row =
+                        '<tr' + (a.isKeyIndicator ? ' class="key-indicator-row"' : '') + '><td class="activity-label" style="' + nameStyle + '">' + a.code + ' ' + a.name + keyTag +
+                        '</td><td style="text-align:left; font-size:0.6rem; color:var(--text-muted);">' + a
+                            .outcome + '</td>';
+                    MONTHS.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        row +=
+                            `
+                            <td><input type="number" min="0" step="1" value="${d.planned}" data-id="${a.id}" data-month="${m}" data-type="planned" /></td>
+                            <td><input type="number" min="0" step="1" value="${d.achieved}" data-id="${a.id}" data-month="${m}" data-type="achieved" /></td>
+                        `;
+                    });
+                    row += '</tr>';
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                dom.editModal.classList.add('visible');
+            }
+
+            function closeEditModal() {
+                dom.editModal.classList.remove('visible');
+            }
+
+            function saveEditModal() {
+                var inputs = dom.modalTbody.querySelectorAll('input[type="number"]');
+                var updates = {};
+                inputs.forEach(function (inp) {
+                    var id = parseInt(inp.dataset.id);
+                    var month = inp.dataset.month;
+                    var type = inp.dataset.type;
+                    var val = parseFloat(inp.value) || 0;
+                    if (!updates[id]) updates[id] = {};
+                    if (!updates[id][month]) updates[id][month] = { planned: 0, achieved: 0 };
+                    updates[id][month][type] = val;
+                });
+                state.activities.forEach(function (a) {
+                    if (updates[a.id]) {
+                        MONTHS.forEach(function (m) {
+                            if (updates[a.id][m]) {
+                                a.months[m] = a.months[m] || { planned: 0, achieved: 0 };
+                                a.months[m].planned = updates[a.id][m].planned;
+                                a.months[m].achieved = updates[a.id][m].achieved;
+                            }
+                        });
+                    }
+                });
+                saveToLocalStorage();
+                saveToIndexedDB(state.activities);
+                updateDashboard();
+                toast('Data updated successfully!', 'success');
+                closeEditModal();
+            }
+
+            function toggleKeyIndicatorsFilter() {
+                state.keyIndicatorsOnly = !state.keyIndicatorsOnly;
+                if (state.keyIndicatorsOnly) {
+                    if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.add('active');
+                    if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.add('active');
+                    var count = getFilteredData().length;
+                    toast('Filtered to ⭐ ' + count + ' Key Indicators', 'success');
+                } else {
+                    if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.remove('active');
+                    if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.remove('active');
+                    toast('Showing all activities', 'info');
+                }
+                updateDashboard();
+            }
+
+            // ─── Event Bindings ─────────────────────────────
+            function bindEvents() {
+                if (dom.btnLoadFromEmpty) dom.btnLoadFromEmpty.addEventListener('click', loadExcelData);
+                if (dom.btnPdf) {
+                    dom.btnPdf.addEventListener('click', function () {
+                        window.print();
+                    });
+                }
+
+                if (dom.btnKeyIndicators) dom.btnKeyIndicators.addEventListener('click', toggleKeyIndicatorsFilter);
+                if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.addEventListener('click', toggleKeyIndicatorsFilter);
+
+                if (dom.btnChartRegCompare) {
+                    dom.btnChartRegCompare.addEventListener('click', function () {
+                        state.chartRegionView = 'comparison';
+                        renderCharts();
+                    });
+                }
+                if (dom.btnChartRegQuarterly) {
+                    dom.btnChartRegQuarterly.addEventListener('click', function () {
+                        state.chartRegionView = 'quarterly';
+                        renderCharts();
+                    });
+                }
+                if (dom.btnChartRegKey) {
+                    dom.btnChartRegKey.addEventListener('click', function () {
+                        state.chartRegionView = 'key_indicators';
+                        renderCharts();
+                    });
+                }
+
+                function switchView(viewName) {
+                    state.activeView = viewName;
+                    if (dom.btnViewTable) dom.btnViewTable.classList.toggle('btn-primary', viewName === 'table');
+                    if (dom.btnViewCharts) dom.btnViewCharts.classList.toggle('btn-primary', viewName === 'charts');
+                    if (dom.btnViewCards) dom.btnViewCards.classList.toggle('btn-primary', viewName === 'cards');
+
+                    if (dom.tableSection) dom.tableSection.style.display = (viewName === 'table') ? 'block' : 'none';
+                    if (dom.chartsSection) dom.chartsSection.style.display = (viewName === 'charts') ? 'block' : 'none';
+                    if (dom.cardsSection) dom.cardsSection.style.display = (viewName === 'cards') ? 'block' : 'none';
+
+                    if (viewName === 'charts') {
+                        renderCharts();
+                    } else if (viewName === 'cards') {
+                        renderActivityKPICards();
+                    }
+                }
+
+                if (dom.btnViewTable) {
+                    dom.btnViewTable.addEventListener('click', function () {
+                        switchView('table');
+                    });
+                }
+
+                if (dom.btnViewCharts) {
+                    dom.btnViewCharts.addEventListener('click', function () {
+                        switchView('charts');
+                    });
+                }
+
+                if (dom.btnViewCards) {
+                    dom.btnViewCards.addEventListener('click', function () {
+                        switchView('cards');
+                    });
+                }
+
+                if (dom.cardsSection) {
+                    dom.cardsSection.addEventListener('click', function (e) {
+                        var btn = e.target.closest('[data-card-toggle-id]');
+                        if (btn) {
+                            var id = parseInt(btn.dataset.cardToggleId);
+                            if (state.expandedCardIds.has(id)) {
+                                state.expandedCardIds.delete(id);
+                            } else {
+                                state.expandedCardIds.add(id);
+                            }
+                            renderActivityKPICards();
+                        }
+                    });
+                }
+
+                setupOutcomePills();
+
+                if (dom.btnLogout) dom.btnLogout.addEventListener('click', logout);
+
+                if (dom.regionSelect) {
+                    dom.regionSelect.addEventListener('change', function () {
+                        switchRegion(dom.regionSelect.value);
+                    });
+                }
+
+                if (dom.regionalChipsGrid) {
+                    dom.regionalChipsGrid.addEventListener('click', function (e) {
+                        var chip = e.target.closest('[data-region]');
+                        if (chip) {
+                            switchRegion(chip.dataset.region);
+                        }
+                    });
+                }
+
+                dom.outcomeSelect.addEventListener('change', function () {
+                    state.activeOutcome = dom.outcomeSelect.value;
+                    updateDashboard();
+                });
+
+                dom.quarterSelect.addEventListener('change', function () {
+                    state.activeQuarter = dom.quarterSelect.value;
+                    updateDashboard();
+                });
+
+                dom.statusSelect.addEventListener('change', function () {
+                    state.activeStatus = dom.statusSelect.value;
+                    updateDashboard();
+                });
+
+                function setStatusFilter(statusVal) {
+                    state.activeStatus = statusVal;
+                    if (dom.statusSelect) dom.statusSelect.value = statusVal;
+                    updateDashboard();
+                }
+
+                if (dom.kpiCardActive) {
+                    dom.kpiCardActive.style.cursor = 'pointer';
+                    dom.kpiCardActive.addEventListener('click', function () {
+                        setStatusFilter('all');
+                        toast('Filter: Showing all active activities', 'info');
+                    });
+                }
+                if (dom.kpiCardFully) {
+                    dom.kpiCardFully.style.cursor = 'pointer';
+                    dom.kpiCardFully.addEventListener('click', function () {
+                        setStatusFilter(state.activeStatus === 'fully' ? 'all' : 'fully');
+                    });
+                }
+                if (dom.kpiCardPartial) {
+                    dom.kpiCardPartial.style.cursor = 'pointer';
+                    dom.kpiCardPartial.addEventListener('click', function () {
+                        setStatusFilter(state.activeStatus === 'partial' ? 'all' : 'partial');
+                    });
+                }
+                if (dom.kpiCardNot) {
+                    dom.kpiCardNot.style.cursor = 'pointer';
+                    dom.kpiCardNot.addEventListener('click', function () {
+                        setStatusFilter(state.activeStatus === 'notstarted' ? 'all' : 'notstarted');
+                    });
+                }
+                if (dom.kpiCardZeroTarget) {
+                    dom.kpiCardZeroTarget.style.cursor = 'pointer';
+                    dom.kpiCardZeroTarget.addEventListener('click', function () {
+                        setStatusFilter(state.activeStatus === 'zerotarget' ? 'all' : 'zerotarget');
+                    });
+                }
+
+                if (dom.searchInput) {
+                    dom.searchInput.addEventListener('input', function () {
+                        state.searchQuery = dom.searchInput.value;
+                        updateDashboard();
+                    });
+                }
+
+                dom.tableTbody.addEventListener('click', function (e) {
+                    var target = e.target.closest('[data-toggle-id]');
+                    if (target) {
+                        var id = parseInt(target.dataset.toggleId);
+                        if (state.expandedIds.has(id)) {
+                            state.expandedIds.delete(id);
+                        } else {
+                            state.expandedIds.add(id);
+                        }
+                        updateTable();
+                    }
+                });
+
+                dom.btnEditData.addEventListener('click', openEditModal);
+
+                dom.modalClose.addEventListener('click', closeEditModal);
+                dom.modalCancel.addEventListener('click', closeEditModal);
+                dom.modalSave.addEventListener('click', saveEditModal);
+                dom.editModal.addEventListener('click', function (e) {
+                    if (e.target === dom.editModal) closeEditModal();
+                });
+
+                dom.themeSwitch.addEventListener('click', toggleTheme);
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape' && dom.editModal.classList.contains('visible')) closeEditModal();
+                });
+
+                setupDragDrop();
+            }
+
+            // ─── Init ──────────────────────────────────────
+            async function init() {
+                initTheme();
+                var loaded = false;
+
+                var isFileProtocol = window.location.protocol === 'file:';
+                var banner = document.getElementById('protocol-warning-banner');
+                if (banner) {
+                    banner.style.display = isFileProtocol ? 'block' : 'none';
+                }
+
+                // 1. Primary: Use pre-compiled 2025 Regional Filled Datasets
+                if (window.REGIONAL_DATA && Object.keys(window.REGIONAL_DATA).length > 0) {
+                    state.activeRegion = 'all';
+                    state.activities = computeConsolidatedActivities('all');
+                    loaded = true;
+                    var timeStr = new Date().toLocaleTimeString();
+                    localStorage.setItem('zl-last-updated', 'Live 2025 Regional Data at ' + timeStr);
+                }
+
+                // 2. Fallback: fetch default Excel file if regional data not present
+                if (!loaded) {
+                    loaded = await fetchDefaultExcelFile();
+                }
+
+                // 3. Fallback: try saved File Handle from disk
+                if (!loaded) {
+                    var handle = await getFileHandleFromIndexedDB();
+                    if (handle) {
+                        loaded = await loadFromFileHandle(handle);
+                    }
+                }
+
+                // 4. Fallback: cached LocalStorage / IndexedDB
+                if (!loaded) {
+                    loaded = loadFromLocalStorage();
+                    if (!loaded) {
+                        var idxData = await loadFromIndexedDB();
+                        if (idxData && idxData.length) {
+                            state.activities = idxData;
+                            loaded = true;
+                        }
+                    }
+                }
+
+                if (loaded && state.activities.length) {
+                    state.dataLoaded = true;
+                    dom.emptyState.style.display = 'none';
+                    dom.dashboard.style.display = 'block';
+                    populateOutcomeFilter();
+                    renderRegionalChips();
+                    updateDashboard();
+                    updateDataStatus(true, state.activities.length);
+                } else {
+                    dom.emptyState.style.display = 'flex';
+                    dom.dashboard.style.display = 'none';
+                    updateDataStatus(false, 0);
+                }
+                bindEvents();
+            }
+
+            document.addEventListener('DOMContentLoaded', init);
+
+        })();
+    </script>
+
 </body>
 
 </html>
