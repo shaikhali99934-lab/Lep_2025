@@ -542,6 +542,30 @@
             transform: translateY(-1px);
         }
 
+        .btn-reset {
+            background: linear-gradient(135deg, #64748b, #475569);
+            border-color: transparent;
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .btn-reset:hover {
+            background: linear-gradient(135deg, #475569, #334155);
+            box-shadow: 0 4px 15px rgba(100, 116, 139, 0.35);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+
+        .table-toolbar .btn-reset {
+            height: 32px;
+            min-width: auto;
+            padding: 0 var(--space-md);
+        }
+
         .btn-pdf {
             background: linear-gradient(135deg, #ef4444, #dc2626);
             border-color: transparent;
@@ -1794,11 +1818,13 @@
                         <button id="btn-view-charts" class="btn">📊 Charts View</button>
                         <button id="btn-view-cards" class="btn">🗂️ Activity KPI Cards</button>
                         <button id="btn-key-indicators" class="btn btn-key-indicators"
-                            title="Filter & analyze Green formatted Key Indicators">⭐Main Activities<span
+                            title="Filter & analyze Green formatted Key Indicators">⭐ Main Activities <span
                                 id="key-indicators-count"
                                 style="font-weight:700; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:10px; font-size:0.65rem; margin-left:4px;">(7)</span></button>
                     </div>
                     <div class="action-buttons" style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
+                        <button class="btn btn-reset no-print" id="btn-reset-top"
+                            title="Reset all filters, search, and selections">🔄 &nbsp;Reset</button>
                         <button class="btn btn-edit no-print" id="btn-edit-data">✏️ &nbsp;Edit Data</button>
                         <button class="btn btn-pdf no-print" id="btn-pdf">🖨️ &nbsp;Print/PDF</button>
                     </div>
@@ -1894,7 +1920,7 @@
                                         style="font-size:0.68rem; padding: 3px 10px;">🌐 Province Benchmark</button>
                                 </div>
                             </div>
-                            <div style="height: 240px; position: relative;"><canvas id="chart-region"></canvas></div>
+                            <div style="height: 270px; position: relative;"><canvas id="chart-region"></canvas></div>
                         </div>
                         <!-- Chart 3: Monthly Progress Trend Line Chart -->
                         <div class="chart-card"
@@ -1958,6 +1984,10 @@
                                 placeholder="🔍 Search code or activity..."
                                 style="background: transparent; border: none; color: var(--text-primary); font-size: 0.75rem; width: 100%; outline: none;" />
                         </div>
+                        <button id="btn-reset-filters" class="btn btn-reset no-print"
+                            title="Reset all filters, search, and selections">
+                            🔄 &nbsp;Reset
+                        </button>
                     </div>
                 </div>
 
@@ -1982,6 +2012,48 @@
                                 style="font-weight:700; background:var(--bg-glass); border-top:2px solid var(--border-color);">
                             </tfoot>
                         </table>
+                    </div>
+
+                    <!-- Main Activities Visual Representation (Target vs Achievement Chart below Table) -->
+                    <div class="main-activities-visual-card" id="main-activities-visual-card"
+                        style="display: none; margin-top: var(--space-md); background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: var(--space-md); box-shadow: var(--shadow-sm);">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: var(--space-sm); border-bottom: 1px solid var(--border-color); padding-bottom: var(--space-xs);">
+                            <div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 1.1rem;">⭐</span>
+                                    <h3
+                                        style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); text-transform: uppercase; letter-spacing: 0.04em; margin: 0;">
+                                        Main Activities — Target vs Achievement Visual Analytics</h3>
+                                    <span class="region-badge-pill" id="main-acts-region-badge"
+                                        style="font-size: 0.68rem;">🌐 All Regions</span>
+                                </div>
+                                <p
+                                    style="font-size: 0.73rem; color: var(--text-muted); margin-top: 3px; margin-bottom: 0;">
+                                    Visual breakdown of core project key indicators comparing Planned Target against
+                                    Actual Achieved.
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
+                                <div class="pill-group"
+                                    style="display: flex; gap: 4px; background: var(--bg-glass); padding: 3px; border-radius: 20px; border: 1px solid var(--border-color);">
+                                    <button class="pill-btn active" id="btn-main-acts-counts"
+                                        style="font-size: 0.68rem; padding: 3px 10px;">📊 Target vs Achieved</button>
+                                    <button class="pill-btn" id="btn-main-acts-pct"
+                                        style="font-size: 0.68rem; padding: 3px 10px;">🎯 Achievement Rate (%)</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Summary KPI Ribbon for Main Activities -->
+                        <div id="main-acts-summary-ribbon"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: var(--space-md);">
+                        </div>
+
+                        <!-- Chart Canvas Container -->
+                        <div style="height: 290px; position: relative;">
+                            <canvas id="chart-main-activities"></canvas>
+                        </div>
                     </div>
                 </div>
 
@@ -2361,6 +2433,7 @@
                 activeQuarter: 'all',
                 activeStatus: 'all',
                 keyIndicatorsOnly: false,
+                mainActsChartView: 'counts',
                 searchQuery: '',
                 expandedIds: new Set(),
                 expandedCardIds: new Set(),
@@ -2375,6 +2448,7 @@
             let chartStatus = null;
             let chartTrend = null;
             let chartRegion = null;
+            let chartMainActivities = null;
 
             // ─── DOM refs ──────────────────────────────────
             const $ = (s) => document.querySelector(s);
@@ -2417,6 +2491,8 @@
                 btnLoadFromEmpty: $('#btn-load-from-empty'),
                 btnEditData: $('#btn-edit-data'),
                 btnPdf: $('#btn-pdf'),
+                btnResetTop: $('#btn-reset-top'),
+                btnResetFilters: $('#btn-reset-filters'),
                 btnLogout: $('#btn-logout'),
                 btnViewTable: $('#btn-view-table'),
                 btnViewCharts: $('#btn-view-charts'),
@@ -2426,6 +2502,12 @@
                 keyIndicatorsCount: $('#key-indicators-count'),
                 chartsSection: $('#charts-section'),
                 tableSection: $('#table-section'),
+                mainActivitiesVisualCard: $('#main-activities-visual-card'),
+                chartMainActivitiesCanvas: $('#chart-main-activities'),
+                btnMainActsCounts: $('#btn-main-acts-counts'),
+                btnMainActsPct: $('#btn-main-acts-pct'),
+                mainActsSummaryRibbon: $('#main-acts-summary-ribbon'),
+                mainActsRegionBadge: $('#main-acts-region-badge'),
                 cardsSection: $('#cards-section'),
                 activityKpiGrid: $('#activity-kpi-grid'),
                 cardsVisibleCount: $('#cards-visible-count'),
@@ -2574,7 +2656,10 @@
                 state.theme = theme;
                 document.documentElement.setAttribute('data-theme', theme);
                 localStorage.setItem('zl-theme', theme);
-                if (state.dataLoaded) renderCharts();
+                if (state.dataLoaded) {
+                    renderCharts();
+                    if (state.keyIndicatorsOnly) renderMainActivitiesVisualChart();
+                }
             }
 
             function toggleTheme() {
@@ -3160,6 +3245,7 @@
                 renderActivityKPICards();
                 syncOutcomePills();
                 renderRegionalChips();
+                renderMainActivitiesVisualChart();
             }
 
             function updateKPIs() {
@@ -3535,6 +3621,67 @@
                             return (state.activeQuarter === qd.key) ? 2.5 : 1.5;
                         });
 
+                        var quarterlyBarLabelsPlugin = {
+                            id: 'quarterlyBarLabels',
+                            afterDatasetsDraw: function (chart) {
+                                var ctx = chart.ctx;
+                                ctx.save();
+
+                                chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                                    var meta = chart.getDatasetMeta(datasetIndex);
+                                    if (meta.hidden) return;
+
+                                    var isPlanned = (datasetIndex === 0);
+                                    var baseLabelName = isPlanned ? 'Planned' : 'Achieved';
+
+                                    meta.data.forEach(function (bar, idx) {
+                                        var val = dataset.data[idx];
+                                        if (val === undefined || val === null) return;
+
+                                        var barWidth = bar.width || 30;
+                                        var labelName = (barWidth < 34) ? (isPlanned ? 'Plan' : 'Ach') : baseLabelName;
+                                        var valText = '';
+                                        if (val >= 1000000) {
+                                            valText = (val / 1000000).toFixed(1) + 'M';
+                                        } else if (val >= 100000) {
+                                            valText = (val / 1000).toFixed(0) + 'k';
+                                        } else if (val >= 1000) {
+                                            valText = (val / 1000).toFixed(1) + 'k';
+                                        } else {
+                                            valText = Math.round(val).toLocaleString();
+                                        }
+
+                                        var x = bar.x;
+                                        var y = bar.y;
+
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+
+                                        var labelColor = isPlanned
+                                            ? (isDark ? '#38bdf8' : '#0284c7')
+                                            : (isDark ? '#34d399' : '#059669');
+
+                                        ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.9)';
+                                        ctx.shadowBlur = 3;
+
+                                        // Line 1: "Planned" or "Achieved"
+                                        ctx.font = '600 8.5px "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+                                        ctx.fillStyle = labelColor;
+                                        ctx.fillText(labelName, x, y - 11);
+
+                                        // Line 2: e.g. "481k"
+                                        ctx.font = 'bold 9.5px "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+                                        ctx.fillStyle = textColor;
+                                        ctx.fillText(valText, x, y - 2);
+
+                                        ctx.shadowColor = 'transparent';
+                                    });
+                                });
+
+                                ctx.restore();
+                            }
+                        };
+
                         chartRegion = new Chart(dom.chartRegionCanvas, {
                             type: 'bar',
                             data: {
@@ -3558,6 +3705,7 @@
                                     }
                                 ]
                             },
+                            plugins: [quarterlyBarLabelsPlugin],
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
@@ -3591,7 +3739,11 @@
                                 },
                                 scales: {
                                     x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                                    y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                                    y: {
+                                        grace: '18%',
+                                        ticks: { color: textColor, font: { size: 10 } },
+                                        grid: { color: gridColor }
+                                    }
                                 }
                             }
                         });
@@ -3732,6 +3884,78 @@
                             }
                         });
 
+                        var regionalBarLabelsPlugin = {
+                            id: 'regionalBarLabels',
+                            afterDatasetsDraw: function (chart) {
+                                var ctx = chart.ctx;
+                                ctx.save();
+
+                                chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                                    var meta = chart.getDatasetMeta(datasetIndex);
+                                    if (meta.hidden) return;
+
+                                    var isPlanned = (datasetIndex === 0);
+                                    var baseLabelName = isPlanned ? 'Planned' : 'Achieved';
+
+                                    meta.data.forEach(function (bar, idx) {
+                                        var val = dataset.data[idx];
+                                        if (val === undefined || val === null) return;
+
+                                        var barWidth = bar.width || 30;
+                                        var labelName = (barWidth < 34) ? (isPlanned ? 'Plan' : 'Ach') : baseLabelName;
+                                        var valText = '';
+                                        if (val >= 1000000) {
+                                            valText = (val / 1000000).toFixed(1) + 'M';
+                                        } else if (val >= 100000) {
+                                            valText = (val / 1000).toFixed(0) + 'k';
+                                        } else if (val >= 1000) {
+                                            valText = (val / 1000).toFixed(1) + 'k';
+                                        } else {
+                                            valText = Math.round(val).toLocaleString();
+                                        }
+
+                                        var x = bar.x;
+                                        var y = bar.y;
+
+                                        ctx.textAlign = 'center';
+                                        ctx.textBaseline = 'bottom';
+
+                                        var regKey = regComparisonKeys[idx];
+                                        var isSpotlighted = !isSelectedRegion || (state.activeRegion === regKey);
+
+                                        var labelColor = isPlanned
+                                            ? (isDark ? '#38bdf8' : '#0284c7')
+                                            : (isDark ? '#34d399' : '#059669');
+
+                                        if (!isSpotlighted) {
+                                            labelColor = isDark ? 'rgba(148, 163, 184, 0.45)' : 'rgba(100, 116, 139, 0.55)';
+                                        }
+
+                                        var valColor = (!isSpotlighted)
+                                            ? (isDark ? 'rgba(148, 163, 184, 0.55)' : 'rgba(100, 116, 139, 0.65)')
+                                            : textColor;
+
+                                        ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.9)';
+                                        ctx.shadowBlur = 3;
+
+                                        // Line 1: "Planned" or "Achieved"
+                                        ctx.font = '600 8px "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+                                        ctx.fillStyle = labelColor;
+                                        ctx.fillText(labelName, x, y - 11);
+
+                                        // Line 2: e.g. "481k"
+                                        ctx.font = 'bold 9px "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+                                        ctx.fillStyle = valColor;
+                                        ctx.fillText(valText, x, y - 2);
+
+                                        ctx.shadowColor = 'transparent';
+                                    });
+                                });
+
+                                ctx.restore();
+                            }
+                        };
+
                         chartRegion = new Chart(dom.chartRegionCanvas, {
                             type: 'bar',
                             data: {
@@ -3755,6 +3979,7 @@
                                     }
                                 ]
                             },
+                            plugins: [regionalBarLabelsPlugin],
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
@@ -3787,11 +4012,342 @@
                                 },
                                 scales: {
                                     x: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } },
-                                    y: { ticks: { color: textColor, font: { size: 10 } }, grid: { color: gridColor } }
+                                    y: {
+                                        grace: '18%',
+                                        ticks: { color: textColor, font: { size: 10 } },
+                                        grid: { color: gridColor }
+                                    }
                                 }
                             }
                         });
                     }
+                }
+            }
+
+            // ─── Main Activities Visual Representation (Below Table) ─────
+            function renderMainActivitiesVisualChart() {
+                if (!dom.mainActivitiesVisualCard) return;
+
+                if (!state.keyIndicatorsOnly) {
+                    dom.mainActivitiesVisualCard.style.display = 'none';
+                    if (chartMainActivities) {
+                        chartMainActivities.destroy();
+                        chartMainActivities = null;
+                    }
+                    return;
+                }
+
+                dom.mainActivitiesVisualCard.style.display = 'block';
+
+                var acts = state.activities || [];
+                var keyActs = acts.filter(function (a) { return a.isKeyIndicator; });
+
+                if (state.activeOutcome !== 'all') {
+                    keyActs = keyActs.filter(function (a) { return a.outcome === state.activeOutcome; });
+                }
+                if (state.searchQuery && state.searchQuery.trim() !== '') {
+                    var q = state.searchQuery.toLowerCase().trim();
+                    keyActs = keyActs.filter(function (a) {
+                        return a.code.toLowerCase().includes(q) ||
+                            (a.originalCode && a.originalCode.toLowerCase().includes(q)) ||
+                            a.name.toLowerCase().includes(q);
+                    });
+                }
+
+                var activeMonths = getActiveMonths();
+                var isDark = state.theme === 'dark';
+                var textColor = isDark ? '#cbd5e1' : '#334155';
+                var gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.06)';
+
+                if (dom.mainActsRegionBadge) {
+                    var curCfg = REGION_CONFIG.find(function (c) { return c.key === state.activeRegion; });
+                    dom.mainActsRegionBadge.textContent = curCfg ? (curCfg.icon + ' ' + curCfg.label) : state.activeRegion;
+                }
+
+                var totalP = 0, totalA = 0;
+                var labels = [];
+                var fullTitles = [];
+                var plannedData = [];
+                var achievedData = [];
+                var pctData = [];
+
+                var shortNameMap = {
+                    '1.1.1': '1.1.1 Contact Screening',
+                    '1.1.1b': '1.1.1b Skin Camps',
+                    '1.1.2': '1.1.2 Follow-up',
+                    '1.1.3': '1.1.3 Confirmation Dx',
+                    '1.1.6': '1.1.6 SDR-PEP Given',
+                    '2.1.1': '2.1.1 OPD Clinic',
+                    '3.1.3': '3.1.3 Feedback'
+                };
+
+                keyActs.forEach(function (a) {
+                    var p = 0, ach = 0;
+                    activeMonths.forEach(function (m) {
+                        var d = a.months[m] || { planned: 0, achieved: 0 };
+                        p += (d.planned || 0);
+                        ach += (d.achieved || 0);
+                    });
+                    totalP += p;
+                    totalA += ach;
+
+                    var pct = p > 0 ? (ach / p) * 100 : 0;
+                    var shortLabel = shortNameMap[a.code] || (a.code + ' ' + (a.name.length > 18 ? a.name.substring(0, 16) + '...' : a.name));
+
+                    labels.push(shortLabel);
+                    fullTitles.push(a.code + ': ' + a.name);
+                    plannedData.push(p);
+                    achievedData.push(ach);
+                    pctData.push(pct);
+                });
+
+                var overallPct = totalP > 0 ? (totalA / totalP) * 100 : 0;
+
+                if (dom.mainActsSummaryRibbon) {
+                    var pctColor = overallPct >= 100 ? '#10b981' : (overallPct >= 70 ? '#f59e0b' : '#ef4444');
+                    dom.mainActsSummaryRibbon.innerHTML = `
+                        <div style="background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Core Activities</span>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: var(--accent-1);">${keyActs.length}</span>
+                            <span style="font-size: 0.65rem; color: var(--text-muted);">Main key indicators</span>
+                        </div>
+                        <div style="background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Total Planned</span>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: #0891b2;">${Math.round(totalP).toLocaleString()}</span>
+                            <span style="font-size: 0.65rem; color: var(--text-muted);">Target allocated</span>
+                        </div>
+                        <div style="background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Total Achieved</span>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: #10b981;">${Math.round(totalA).toLocaleString()}</span>
+                            <span style="font-size: 0.65rem; color: var(--text-muted);">Actual completed</span>
+                        </div>
+                        <div style="background: var(--bg-glass); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px 12px; display: flex; flex-direction: column; gap: 2px;">
+                            <span style="font-size: 0.68rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Overall Achievement</span>
+                            <span style="font-size: 1.15rem; font-weight: 800; color: ${pctColor};">${overallPct.toFixed(1)}%</span>
+                            <span style="font-size: 0.65rem; color: var(--text-muted);">${totalA >= totalP ? '🎯 Target Surpassed' : '⚡ In Progress'}</span>
+                        </div>
+                    `;
+                }
+
+                if (chartMainActivities) {
+                    chartMainActivities.destroy();
+                    chartMainActivities = null;
+                }
+
+                if (!dom.chartMainActivitiesCanvas) return;
+
+                var viewMode = state.mainActsChartView || 'counts';
+
+                if (viewMode === 'pct') {
+                    var bgColors = pctData.map(function (v) {
+                        if (v >= 100) return 'rgba(16, 185, 129, 0.85)';
+                        if (v >= 70) return 'rgba(6, 182, 212, 0.85)';
+                        if (v >= 50) return 'rgba(245, 158, 11, 0.85)';
+                        return 'rgba(239, 68, 68, 0.85)';
+                    });
+                    var borderColors = pctData.map(function (v) {
+                        if (v >= 100) return '#10b981';
+                        if (v >= 70) return '#06b6d4';
+                        if (v >= 50) return '#f59e0b';
+                        return '#ef4444';
+                    });
+
+                    var pctLabelsPlugin = {
+                        id: 'mainActsPctLabels',
+                        afterDatasetsDraw: function (chart) {
+                            var ctx = chart.ctx;
+                            ctx.save();
+                            var meta = chart.getDatasetMeta(0);
+                            if (!meta.hidden) {
+                                meta.data.forEach(function (bar, idx) {
+                                    var val = pctData[idx];
+                                    var x = bar.x;
+                                    var y = bar.y;
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+                                    ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.9)';
+                                    ctx.shadowBlur = 3;
+                                    ctx.font = 'bold 9.5px "Inter", sans-serif';
+                                    ctx.fillStyle = textColor;
+                                    ctx.fillText(val.toFixed(1) + '%', x, y - 2);
+                                    ctx.shadowColor = 'transparent';
+                                });
+                            }
+                            ctx.restore();
+                        }
+                    };
+
+                    chartMainActivities = new Chart(dom.chartMainActivitiesCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Achievement Rate (%)',
+                                data: pctData,
+                                backgroundColor: bgColors,
+                                borderColor: borderColors,
+                                borderWidth: 1.5,
+                                borderRadius: 5
+                            }]
+                        },
+                        plugins: [pctLabelsPlugin],
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    callbacks: {
+                                        title: function (items) {
+                                            var idx = items[0].dataIndex;
+                                            return fullTitles[idx] || items[0].label;
+                                        },
+                                        label: function (item) {
+                                            var idx = item.dataIndex;
+                                            var p = plannedData[idx];
+                                            var a = achievedData[idx];
+                                            return [
+                                                'Achievement: ' + item.raw.toFixed(1) + '%',
+                                                'Planned: ' + Math.round(p).toLocaleString(),
+                                                'Achieved: ' + Math.round(a).toLocaleString()
+                                            ];
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { ticks: { color: textColor, font: { size: 9.5 } }, grid: { color: gridColor } },
+                                y: {
+                                    grace: '18%',
+                                    ticks: {
+                                        color: textColor,
+                                        font: { size: 10 },
+                                        callback: function (val) { return val + '%'; }
+                                    },
+                                    grid: { color: gridColor }
+                                }
+                            }
+                        }
+                    });
+
+                } else {
+                    var mainActsBarLabelsPlugin = {
+                        id: 'mainActsBarLabels',
+                        afterDatasetsDraw: function (chart) {
+                            var ctx = chart.ctx;
+                            ctx.save();
+                            chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                                var meta = chart.getDatasetMeta(datasetIndex);
+                                if (meta.hidden) return;
+
+                                var isPlanned = (datasetIndex === 0);
+                                var baseLabelName = isPlanned ? 'Planned' : 'Achieved';
+
+                                meta.data.forEach(function (bar, idx) {
+                                    var val = dataset.data[idx];
+                                    if (val === undefined || val === null) return;
+
+                                    var barWidth = bar.width || 30;
+                                    var labelName = (barWidth < 34) ? (isPlanned ? 'Plan' : 'Ach') : baseLabelName;
+
+                                    var valText = '';
+                                    if (val >= 1000000) {
+                                        valText = (val / 1000000).toFixed(1) + 'M';
+                                    } else if (val >= 100000) {
+                                        valText = (val / 1000).toFixed(0) + 'k';
+                                    } else if (val >= 1000) {
+                                        valText = (val / 1000).toFixed(1) + 'k';
+                                    } else {
+                                        valText = Math.round(val).toLocaleString();
+                                    }
+
+                                    var x = bar.x;
+                                    var y = bar.y;
+
+                                    ctx.textAlign = 'center';
+                                    ctx.textBaseline = 'bottom';
+
+                                    var labelColor = isPlanned
+                                        ? (isDark ? '#38bdf8' : '#0284c7')
+                                        : (isDark ? '#34d399' : '#059669');
+
+                                    ctx.shadowColor = isDark ? 'rgba(0, 0, 0, 0.85)' : 'rgba(255, 255, 255, 0.9)';
+                                    ctx.shadowBlur = 3;
+
+                                    ctx.font = '600 8px "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+                                    ctx.fillStyle = labelColor;
+                                    ctx.fillText(labelName, x, y - 11);
+
+                                    ctx.font = 'bold 9px "Inter", -apple-system, BlinkMacSystemFont, sans-serif';
+                                    ctx.fillStyle = textColor;
+                                    ctx.fillText(valText, x, y - 2);
+
+                                    ctx.shadowColor = 'transparent';
+                                });
+                            });
+                            ctx.restore();
+                        }
+                    };
+
+                    chartMainActivities = new Chart(dom.chartMainActivitiesCanvas, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [
+                                {
+                                    label: 'Planned Target',
+                                    data: plannedData,
+                                    backgroundColor: 'rgba(6, 182, 212, 0.82)',
+                                    borderColor: '#06b6d4',
+                                    borderWidth: 1.5,
+                                    borderRadius: 4
+                                },
+                                {
+                                    label: 'Actual Achieved',
+                                    data: achievedData,
+                                    backgroundColor: 'rgba(16, 185, 129, 0.82)',
+                                    borderColor: '#10b981',
+                                    borderWidth: 1.5,
+                                    borderRadius: 4
+                                }
+                            ]
+                        },
+                        plugins: [mainActsBarLabelsPlugin],
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    labels: { color: textColor, font: { size: 10 } }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        title: function (items) {
+                                            var idx = items[0].dataIndex;
+                                            return fullTitles[idx] || items[0].label;
+                                        },
+                                        afterBody: function (items) {
+                                            var idx = items[0].dataIndex;
+                                            var p = plannedData[idx];
+                                            var a = achievedData[idx];
+                                            var pct = p > 0 ? ((a / p) * 100).toFixed(1) + '%' : '0%';
+                                            return 'Achievement Rate: ' + pct;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { ticks: { color: textColor, font: { size: 9.5 } }, grid: { color: gridColor } },
+                                y: {
+                                    grace: '18%',
+                                    ticks: { color: textColor, font: { size: 10 } },
+                                    grid: { color: gridColor }
+                                }
+                            }
+                        }
+                    });
                 }
             }
 
@@ -4057,13 +4613,45 @@
                     if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.add('active');
                     if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.add('active');
                     var count = getFilteredData().length;
-                    toast('Filtered to ⭐ ' + count + ' Key Indicators', 'success');
+                    toast('Filtered to ⭐ ' + count + ' Main Activities', 'success');
+                    if (state.activeView !== 'table') {
+                        switchView('table');
+                    }
                 } else {
                     if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.remove('active');
                     if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.remove('active');
                     toast('Showing all activities', 'info');
                 }
                 updateDashboard();
+            }
+
+            function resetAllFilters() {
+                state.activeOutcome = 'all';
+                if (dom.outcomeSelect) dom.outcomeSelect.value = 'all';
+
+                state.activeQuarter = 'all';
+                if (dom.quarterSelect) dom.quarterSelect.value = 'all';
+
+                state.activeStatus = 'all';
+                if (dom.statusSelect) dom.statusSelect.value = 'all';
+
+                state.searchQuery = '';
+                if (dom.searchInput) dom.searchInput.value = '';
+
+                state.keyIndicatorsOnly = false;
+                if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.remove('active');
+                if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.remove('active');
+
+                state.expandedIds.clear();
+                state.expandedCardIds.clear();
+
+                if (state.activeRegion !== 'all') {
+                    switchRegion('all');
+                } else {
+                    updateDashboard();
+                }
+
+                toast('🔄 All filters and selections have been reset', 'info');
             }
 
             // ─── Event Bindings ─────────────────────────────
@@ -4074,9 +4662,29 @@
                         window.print();
                     });
                 }
+                if (dom.btnResetTop) dom.btnResetTop.addEventListener('click', resetAllFilters);
+                if (dom.btnResetFilters) dom.btnResetFilters.addEventListener('click', resetAllFilters);
 
                 if (dom.btnKeyIndicators) dom.btnKeyIndicators.addEventListener('click', toggleKeyIndicatorsFilter);
                 if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.addEventListener('click', toggleKeyIndicatorsFilter);
+
+                if (dom.btnMainActsCounts) {
+                    dom.btnMainActsCounts.addEventListener('click', function () {
+                        state.mainActsChartView = 'counts';
+                        dom.btnMainActsCounts.classList.add('active');
+                        if (dom.btnMainActsPct) dom.btnMainActsPct.classList.remove('active');
+                        renderMainActivitiesVisualChart();
+                    });
+                }
+
+                if (dom.btnMainActsPct) {
+                    dom.btnMainActsPct.addEventListener('click', function () {
+                        state.mainActsChartView = 'pct';
+                        dom.btnMainActsPct.classList.add('active');
+                        if (dom.btnMainActsCounts) dom.btnMainActsCounts.classList.remove('active');
+                        renderMainActivitiesVisualChart();
+                    });
+                }
 
                 if (dom.btnChartRegCompare) {
                     dom.btnChartRegCompare.addEventListener('click', function () {
