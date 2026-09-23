@@ -600,21 +600,62 @@
         }
 
         .btn-key-indicators {
-            background: linear-gradient(135deg, #10b981, #047857);
-            border-color: transparent;
-            color: #fff;
+            background: var(--bg-card);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #10b981;
             position: relative;
+            transition: all var(--transition-fast);
         }
 
         .btn-key-indicators:hover {
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.25);
+            border-color: #10b981;
+            color: #34d399;
             transform: translateY(-1px);
         }
 
         .btn-key-indicators.active {
-            background: linear-gradient(135deg, #059669, #065f46);
+            background: linear-gradient(135deg, #10b981, #047857);
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.35), 0 4px 20px rgba(16, 185, 129, 0.5);
             border: 1px solid #34d399;
+            color: #fff;
+        }
+
+        .btn-all-activities {
+            background: var(--bg-card);
+            border: 1px solid rgba(2, 132, 199, 0.4);
+            color: #0284c7;
+            position: relative;
+            transition: all var(--transition-fast);
+        }
+
+        .btn-all-activities:hover {
+            box-shadow: 0 4px 20px rgba(2, 132, 199, 0.25);
+            border-color: #0284c7;
+            color: #38bdf8;
+            transform: translateY(-1px);
+        }
+
+        .btn-all-activities.active {
+            background: linear-gradient(135deg, #0284c7, #0369a1);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.35), 0 4px 20px rgba(2, 132, 199, 0.5);
+            border: 1px solid #38bdf8;
+            color: #fff;
+        }
+
+        .btn-key-indicators span,
+        .btn-all-activities span {
+            transition: all var(--transition-fast);
+        }
+
+        .btn-key-indicators:not(.active) span {
+            background: rgba(16, 185, 129, 0.12) !important;
+            color: #10b981;
+        }
+
+        .btn-all-activities:not(.active) span {
+            background: rgba(2, 132, 199, 0.12) !important;
+            color: #0284c7;
         }
 
         .key-badge {
@@ -1817,10 +1858,13 @@
                         <button id="btn-view-table" class="btn btn-primary">📋 Table View</button>
                         <button id="btn-view-charts" class="btn">📊 Charts View</button>
                         <button id="btn-view-cards" class="btn">🗂️ Activity KPI Cards</button>
-                        <button id="btn-key-indicators" class="btn btn-key-indicators"
-                            title="Filter & analyze Green formatted Key Indicators">⭐ Main Activities <span
+                        <button id="btn-key-indicators" class="btn btn-key-indicators active"
+                            title="Filter & analyze Main Activities (Key Indicators)">⭐ Main Activities <span
                                 id="key-indicators-count"
-                                style="font-weight:700; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:10px; font-size:0.65rem; margin-left:4px;">(7)</span></button>
+                                style="font-weight:700; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:10px; font-size:0.65rem; margin-left:4px;">(8)</span></button>
+                        <button id="btn-all-activities" class="btn btn-all-activities"
+                            title="View all activities (clear filter)">📋 All Activities <span id="all-activities-count"
+                                style="font-weight:700; background:rgba(255,255,255,0.25); padding:1px 6px; border-radius:10px; font-size:0.65rem; margin-left:4px;">(87)</span></button>
                     </div>
                     <div class="action-buttons" style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
                         <button class="btn btn-reset no-print" id="btn-reset-top"
@@ -2202,9 +2246,13 @@
             }
 
             // ─── Key Indicators Helper ─────────────────────
-            const KEY_INDICATORS_SET = new Set(['1.1.1', '1.1.1b', '1.1.2', '1.1.3', '1.1.6', '2.1.1', '3.1.3']);
+            const KEY_INDICATORS_SET = new Set(['1.1.1', '1.1.1a', '1.1.1b', '1.1.2', '1.1.3', '1.1.6', '2.1.1', '4.1.3']);
+            const EXCLUDED_KEY_INDICATORS = new Set(['3.1.3']);
 
             function checkIsKeyIndicator(code, originalCode, cellB) {
+                if (EXCLUDED_KEY_INDICATORS.has(code) || EXCLUDED_KEY_INDICATORS.has(originalCode)) {
+                    return false;
+                }
                 if (KEY_INDICATORS_SET.has(code) || KEY_INDICATORS_SET.has(originalCode)) {
                     return true;
                 }
@@ -2235,7 +2283,11 @@
 
                 if (regionKey !== 'all' && regionKey !== 'Sindh (Combined)') {
                     var list = window.REGIONAL_DATA[regionKey] || [];
-                    return JSON.parse(JSON.stringify(list));
+                    var cloned = JSON.parse(JSON.stringify(list));
+                    cloned.forEach(function (item) {
+                        item.isKeyIndicator = checkIsKeyIndicator(item.code, item.originalCode);
+                    });
+                    return cloned;
                 }
 
                 var targetRegions = (regionKey === 'Sindh (Combined)')
@@ -2257,7 +2309,7 @@
                         name: item.name,
                         outcome: item.outcome,
                         isSub: item.isSub,
-                        isKeyIndicator: item.isKeyIndicator,
+                        isKeyIndicator: checkIsKeyIndicator(item.code, item.originalCode),
                         months: monthsCopy
                     };
                 });
@@ -2432,7 +2484,7 @@
                 activeOutcome: 'all',
                 activeQuarter: 'all',
                 activeStatus: 'all',
-                keyIndicatorsOnly: false,
+                keyIndicatorsOnly: true,
                 mainActsChartView: 'counts',
                 searchQuery: '',
                 expandedIds: new Set(),
@@ -2498,8 +2550,10 @@
                 btnViewCharts: $('#btn-view-charts'),
                 btnViewCards: $('#btn-view-cards'),
                 btnKeyIndicators: $('#btn-key-indicators'),
+                btnAllActivities: $('#btn-all-activities'),
                 btnFilterKeyIndicators: $('#btn-filter-key-indicators'),
                 keyIndicatorsCount: $('#key-indicators-count'),
+                allActivitiesCount: $('#all-activities-count'),
                 chartsSection: $('#charts-section'),
                 tableSection: $('#table-section'),
                 mainActivitiesVisualCard: $('#main-activities-visual-card'),
@@ -3221,6 +3275,9 @@
                 if (dom.keyIndicatorsCount) {
                     dom.keyIndicatorsCount.textContent = '(' + keyCount + ')';
                 }
+                if (dom.allActivitiesCount) {
+                    dom.allActivitiesCount.textContent = '(' + state.activities.length + ')';
+                }
             }
 
             function updateDashboard() {
@@ -3230,7 +3287,7 @@
                     var regPrefix = regCfg ? regCfg.label + ' — ' : '';
                     if (state.keyIndicatorsOnly) {
                         var count = getFilteredData().length;
-                        dom.dataSubtitle.textContent = regPrefix + '⭐ Key Indicators Analytics (' + count + ' Key Activities)';
+                        dom.dataSubtitle.textContent = regPrefix + '⭐ Main Activities Analytics (' + count + ' Key Activities)';
                     } else {
                         dom.dataSubtitle.textContent = regPrefix + getQuarterLabel();
                     }
@@ -4073,12 +4130,13 @@
 
                 var shortNameMap = {
                     '1.1.1': '1.1.1 Contact Screening',
+                    '1.1.1a': '1.1.1a House Visits',
                     '1.1.1b': '1.1.1b Skin Camps',
                     '1.1.2': '1.1.2 Follow-up',
                     '1.1.3': '1.1.3 Confirmation Dx',
                     '1.1.6': '1.1.6 SDR-PEP Given',
                     '2.1.1': '2.1.1 OPD Clinic',
-                    '3.1.3': '3.1.3 Feedback'
+                    '4.1.3': '4.1.3 Chest Camps'
                 };
 
                 keyActs.forEach(function (a) {
@@ -4607,22 +4665,26 @@
                 closeEditModal();
             }
 
-            function toggleKeyIndicatorsFilter() {
-                state.keyIndicatorsOnly = !state.keyIndicatorsOnly;
-                if (state.keyIndicatorsOnly) {
-                    if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.add('active');
-                    if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.add('active');
+            function setMainActivitiesFilter(enable, showToastMsg) {
+                state.keyIndicatorsOnly = enable;
+                if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.toggle('active', enable);
+                if (dom.btnAllActivities) dom.btnAllActivities.classList.toggle('active', !enable);
+                if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.toggle('active', enable);
+
+                if (enable) {
                     var count = getFilteredData().length;
-                    toast('Filtered to ⭐ ' + count + ' Main Activities', 'success');
+                    if (showToastMsg !== false) toast('Filtered to ⭐ ' + count + ' Main Activities', 'success');
                     if (state.activeView !== 'table') {
                         switchView('table');
                     }
                 } else {
-                    if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.remove('active');
-                    if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.remove('active');
-                    toast('Showing all activities', 'info');
+                    if (showToastMsg !== false) toast('Showing all ' + state.activities.length + ' activities', 'info');
                 }
                 updateDashboard();
+            }
+
+            function toggleKeyIndicatorsFilter() {
+                setMainActivitiesFilter(!state.keyIndicatorsOnly);
             }
 
             function resetAllFilters() {
@@ -4638,9 +4700,11 @@
                 state.searchQuery = '';
                 if (dom.searchInput) dom.searchInput.value = '';
 
+                // Reset to All Activities
                 state.keyIndicatorsOnly = false;
                 if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.remove('active');
                 if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.classList.remove('active');
+                if (dom.btnAllActivities) dom.btnAllActivities.classList.add('active');
 
                 state.expandedIds.clear();
                 state.expandedCardIds.clear();
@@ -4665,7 +4729,16 @@
                 if (dom.btnResetTop) dom.btnResetTop.addEventListener('click', resetAllFilters);
                 if (dom.btnResetFilters) dom.btnResetFilters.addEventListener('click', resetAllFilters);
 
-                if (dom.btnKeyIndicators) dom.btnKeyIndicators.addEventListener('click', toggleKeyIndicatorsFilter);
+                if (dom.btnKeyIndicators) {
+                    dom.btnKeyIndicators.addEventListener('click', function () {
+                        setMainActivitiesFilter(true);
+                    });
+                }
+                if (dom.btnAllActivities) {
+                    dom.btnAllActivities.addEventListener('click', function () {
+                        setMainActivitiesFilter(false);
+                    });
+                }
                 if (dom.btnFilterKeyIndicators) dom.btnFilterKeyIndicators.addEventListener('click', toggleKeyIndicatorsFilter);
 
                 if (dom.btnMainActsCounts) {
@@ -4938,6 +5011,10 @@
                     dom.dashboard.style.display = 'block';
                     populateOutcomeFilter();
                     renderRegionalChips();
+                    // Open Main Activities section on startup
+                    state.keyIndicatorsOnly = true;
+                    if (dom.btnKeyIndicators) dom.btnKeyIndicators.classList.add('active');
+                    if (dom.btnAllActivities) dom.btnAllActivities.classList.remove('active');
                     updateDashboard();
                     updateDataStatus(true, state.activities.length);
                 } else {
